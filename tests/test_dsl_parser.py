@@ -1,7 +1,7 @@
 """Tests for the DSL parser — pure parsing, no network calls."""
 
 import pytest
-from spotapi.dsl.parser import parse
+from clautify.dsl.parser import parse
 
 
 # ── Playback Actions ──────────────────────────────────────────────

@@ -21,7 +21,7 @@ Initializes the `PublicAlbum` class with an optional album URI and a `TLSClient`
 ## Language Support Examples
 
 ```python
-from spotapi import PublicAlbum
+from clautify import PublicAlbum
 
 # Initialize with Korean language
 album = PublicAlbum("4m2880jivSbbyEGAKfITCa", language="ko")

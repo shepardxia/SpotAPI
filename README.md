@@ -2,9 +2,11 @@
 
 > **Disclaimer**: This repository and any associated code are provided "as is" without warranty of any kind, either expressed or implied. The author of this repository does not accept any responsibility for the use or misuse of this repository or its contents. The author does not endorse any actions or consequences arising from the use of this repository. Any copies, forks, or re-uploads made by other users are not the responsibility of the author. The repository is solely intended as a Proof Of Concept for educational purposes regarding the use of a service's private API. By using this repository, you acknowledge that the author makes no claims about the accuracy, legality, or safety of the code and accepts no liability for any issues that may arise. More information can be found [HERE](./LEGAL_NOTICE.md).
 
-# SpotAPI + DSL
+# clautify
 
-A command-driven interface for Spotify built on top of [SpotAPI](https://github.com/Aran404/SpotAPI) by **Aran**. Control playback, manage playlists, search, and more using plain-text commands parsed by a Lark grammar.
+A DSL-driven Spotify controller. One command string does what used to take five API calls.
+
+Built on [SpotAPI](https://github.com/Aran404/SpotAPI) by **Aran** — a reverse-engineered Spotify Connect client that requires no Premium and no API key. We added a Lark grammar DSL, stripped unused modules, and renamed the package.
 
 **Note**: This project is intended solely for educational purposes. Accessing private endpoints without authorization may violate Spotify's terms of service.
 
@@ -13,7 +15,7 @@ A command-driven interface for Spotify built on top of [SpotAPI](https://github.
 ### 1. Install
 
 ```bash
-pip install -e ".[websocket,redis,pymongo]"
+pip install -e .
 ```
 
 Requires Python 3.10+.
@@ -27,10 +29,10 @@ Requires Python 3.10+.
 ### 3. Save it (one-time)
 
 ```python
-from spotapi.dsl import SpotifySession
+from clautify.dsl import SpotifySession
 
 SpotifySession.setup("paste_your_sp_dc_here")
-# Saved to ~/.config/spotapi/session.json
+# Saved to ~/.config/clautify/session.json
 ```
 
 The `sp_dc` cookie typically lasts ~1 year. Re-run `setup()` if it expires.
@@ -93,32 +95,22 @@ volume 50 mode repeat
 ### Grammar Rules
 
 - Targets are either Spotify URIs (`spotify:track:abc`) or quoted strings (`"Bohemian Rhapsody"`)
+- Quoted strings are auto-resolved via search — no need to look up URIs first
 - State modifiers (`volume`, `mode`, `device`/`on`) only compose with actions
 - Query modifiers (`limit`, `offset`) only compose with queries
 - Mixing them is a parse error
 
 ## Low-Level API
 
-The full SpotAPI interface remains available. See the original docs:
+The underlying API classes are available for direct use:
 
-- [Artist](./docs/artist.md) · [Album](./docs/album.md) · [Song](./docs/song.md) · [Playlist](./docs/playlist.md) · [Player](./docs/player.md)
-- [Login](./docs/login.md) · [Password](./docs/password.md) · [Creator](./docs/creator.md) · [Family](./docs/family.md)
-- [Public](./docs/public.md) · [Status](./docs/status.md) · [User](./docs/user.md)
-
-For fresh login with captcha solver (instead of cookie import):
-
-```python
-from spotapi import Login, Config, NoopLogger, solver_clients
-
-cfg = Config(solver=solver_clients.Capsolver("YOUR_API_KEY"), logger=NoopLogger())
-login = Login(cfg, "PASSWORD", email="EMAIL")
-login.login()
-session = SpotifySession(login)
-```
+- [Artist](./docs/artist.md) · [Album](./docs/album.md) · [Song](./docs/song.md) · [Playlist](./docs/playlist.md)
+- [Player](./docs/player.md) · [Login](./docs/login.md) · [Status](./docs/status.md) · [User](./docs/user.md)
+- [DSL Grammar](./docs/language.md) · [WebSocket](./docs/websocket.md)
 
 ## Credits
 
-Built on [**SpotAPI**](https://github.com/Aran404/SpotAPI) by **Aran** — a reverse-engineered Spotify Connect API client that requires no Premium and no API key.
+Built on [**SpotAPI**](https://github.com/Aran404/SpotAPI) by **Aran** — reverse-engineered Spotify Connect API client. Original codebase provided the HTTP layer, login, player, and all Spotify endpoint wrappers. We added the Lark DSL layer and stripped unused modules.
 
 ## License
 

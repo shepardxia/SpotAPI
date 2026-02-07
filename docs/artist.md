@@ -27,7 +27,7 @@ Changes the language for API requests at runtime.
 ## Language Support Examples
 
 ```python
-from spotapi import Artist
+from clautify import Artist
 
 # Initialize with Korean language
 artist_ko = Artist(language="ko")

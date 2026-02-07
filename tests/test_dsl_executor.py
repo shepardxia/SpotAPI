@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import MagicMock, patch, PropertyMock
-from spotapi.dsl.executor import SpotifyExecutor, DSLError
+from clautify.dsl.executor import SpotifyExecutor, DSLError
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ class TestLazyInit:
     def test_artist_not_created_on_init(self, executor):
         assert executor._artist is None
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_player_created_on_playback(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -38,7 +38,7 @@ class TestLazyInit:
         MockPlayer.assert_called_once_with(executor._login)
         assert executor._player is mock_player
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_player_created_once(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -48,8 +48,8 @@ class TestLazyInit:
 
         MockPlayer.assert_called_once()
 
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_search_does_not_create_player(self, MockPP, MockSong, executor):
         mock_song = MagicMock()
         mock_song.query_songs.return_value = {"data": {"searchV2": {"tracksV2": {"items": []}}}}
@@ -64,7 +64,7 @@ class TestLazyInit:
 
 
 class TestActions:
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_pause(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -75,7 +75,7 @@ class TestActions:
         assert result["status"] == "ok"
         assert result["action"] == "pause"
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_resume(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -85,7 +85,7 @@ class TestActions:
         mock_player.resume.assert_called_once()
         assert result["status"] == "ok"
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_skip_forward(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -95,7 +95,7 @@ class TestActions:
         assert mock_player.skip_next.call_count == 3
         assert result["n"] == 3
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_skip_backward(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -104,7 +104,7 @@ class TestActions:
 
         assert mock_player.skip_prev.call_count == 2
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_seek(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -113,7 +113,7 @@ class TestActions:
 
         mock_player.seek_to.assert_called_once_with(30000)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_queue_uri(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -122,8 +122,8 @@ class TestActions:
 
         mock_player.add_to_queue.assert_called_once_with("spotify:track:abc")
 
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_like(self, MockPP, MockSong, executor):
         mock_song = MagicMock()
         MockSong.return_value = mock_song
@@ -133,8 +133,8 @@ class TestActions:
         mock_song.like_song.assert_called_once_with("abc123")
         assert result["status"] == "ok"
 
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_unlike(self, MockPP, MockSong, executor):
         mock_song = MagicMock()
         MockSong.return_value = mock_song
@@ -143,7 +143,7 @@ class TestActions:
 
         mock_song.unlike_song.assert_called_once_with("abc123")
 
-    @patch("spotapi.dsl.executor.Artist")
+    @patch("clautify.dsl.executor.Artist")
     def test_follow(self, MockArtist, executor):
         mock_artist = MagicMock()
         MockArtist.return_value = mock_artist
@@ -152,7 +152,7 @@ class TestActions:
 
         mock_artist.follow.assert_called_once_with("xyz")
 
-    @patch("spotapi.dsl.executor.Artist")
+    @patch("clautify.dsl.executor.Artist")
     def test_unfollow(self, MockArtist, executor):
         mock_artist = MagicMock()
         MockArtist.return_value = mock_artist
@@ -166,7 +166,7 @@ class TestActions:
 
 
 class TestPlaylistActions:
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_save(self, MockPP, executor):
         mock_pp = MagicMock()
         MockPP.return_value = mock_pp
@@ -176,7 +176,7 @@ class TestPlaylistActions:
         MockPP.assert_called_with(executor._login, "abc123")
         mock_pp.add_to_library.assert_called_once()
 
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_unsave(self, MockPP, executor):
         mock_pp = MagicMock()
         MockPP.return_value = mock_pp
@@ -185,7 +185,7 @@ class TestPlaylistActions:
 
         mock_pp.remove_from_library.assert_called_once()
 
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_delete_playlist(self, MockPP, executor):
         mock_pp = MagicMock()
         MockPP.return_value = mock_pp
@@ -194,8 +194,8 @@ class TestPlaylistActions:
 
         mock_pp.delete_playlist.assert_called_once()
 
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_playlist_add(self, MockPP, MockSong, executor):
         mock_song = MagicMock()
         MockSong.return_value = mock_song
@@ -208,8 +208,8 @@ class TestPlaylistActions:
 
         mock_song.add_song_to_playlist.assert_called_once_with("abc")
 
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_playlist_remove(self, MockPP, MockSong, executor):
         mock_song = MagicMock()
         MockSong.return_value = mock_song
@@ -222,7 +222,7 @@ class TestPlaylistActions:
 
         mock_song.remove_song_from_playlist.assert_called_once_with(song_id="abc")
 
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_create_playlist(self, MockPP, executor):
         mock_pp = MagicMock()
         mock_pp.create_playlist.return_value = "new_playlist_id"
@@ -238,7 +238,7 @@ class TestPlaylistActions:
 
 
 class TestStateModifiers:
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_volume_after_action(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -248,7 +248,7 @@ class TestStateModifiers:
         mock_player.pause.assert_called_once()
         mock_player.set_volume.assert_called_once_with(0.7)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_mode_shuffle(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -258,7 +258,7 @@ class TestStateModifiers:
         mock_player.set_shuffle.assert_called_once_with(True)
         mock_player.repeat_track.assert_called_once_with(False)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_mode_repeat(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -268,7 +268,7 @@ class TestStateModifiers:
         mock_player.set_shuffle.assert_called_once_with(False)
         mock_player.repeat_track.assert_called_once_with(True)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_mode_normal(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -278,7 +278,7 @@ class TestStateModifiers:
         mock_player.set_shuffle.assert_called_once_with(False)
         mock_player.repeat_track.assert_called_once_with(False)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_device_transfer(self, MockPlayer, executor):
         mock_device = MagicMock()
         mock_device.name = "Living Room"
@@ -295,7 +295,7 @@ class TestStateModifiers:
 
         mock_player.transfer_player.assert_called_once_with("origin_device", "abc123hex")
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_standalone_volume(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -310,9 +310,9 @@ class TestStateModifiers:
 
 
 class TestCompoundOps:
-    @patch("spotapi.dsl.executor.Player")
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_play_string_searches_and_plays(self, MockPP, MockSong, MockPlayer, executor):
         mock_song = MagicMock()
         mock_song.query_songs.return_value = {
@@ -338,9 +338,9 @@ class TestCompoundOps:
         mock_player.skip_next.assert_called_once()
         assert result["resolved_uri"] == "spotify:track:found123"
 
-    @patch("spotapi.dsl.executor.Player")
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_play_string_no_results(self, MockPP, MockSong, MockPlayer, executor):
         mock_song = MagicMock()
         mock_song.query_songs.return_value = {
@@ -352,7 +352,7 @@ class TestCompoundOps:
         with pytest.raises(DSLError, match="No results"):
             executor.execute({"action": "play", "target": "nonexistent song xyz"})
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_play_uri_no_context(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -362,7 +362,7 @@ class TestCompoundOps:
         mock_player.add_to_queue.assert_called_once_with("spotify:track:abc")
         mock_player.skip_next.assert_called_once()
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_play_uri_with_context(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -380,8 +380,8 @@ class TestCompoundOps:
 
 
 class TestQueries:
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_search_tracks(self, MockPP, MockSong, executor):
         mock_song = MagicMock()
         mock_song.query_songs.return_value = {"data": "results"}
@@ -392,7 +392,7 @@ class TestQueries:
         mock_song.query_songs.assert_called_once_with("jazz", limit=5, offset=0)
         assert result["data"] == {"data": "results"}
 
-    @patch("spotapi.dsl.executor.Artist")
+    @patch("clautify.dsl.executor.Artist")
     def test_search_artists(self, MockArtist, executor):
         mock_artist = MagicMock()
         mock_artist.query_artists.return_value = {"data": "artist_results"}
@@ -402,7 +402,7 @@ class TestQueries:
 
         mock_artist.query_artists.assert_called_once_with("jazz", limit=10, offset=0)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_now_playing(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.state = {"track": "test"}
@@ -413,7 +413,7 @@ class TestQueries:
         assert result["query"] == "now_playing"
         assert result["data"] == {"track": "test"}
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_get_queue(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.next_songs_in_queue = ["song1", "song2"]
@@ -423,7 +423,7 @@ class TestQueries:
 
         assert result["data"] == ["song1", "song2"]
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_get_devices(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.device_ids = {"device1": "info"}
@@ -433,7 +433,7 @@ class TestQueries:
 
         assert result["data"] == {"device1": "info"}
 
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_library(self, MockPP, executor):
         mock_pp = MagicMock()
         mock_pp.get_library.return_value = {"items": []}
@@ -443,7 +443,7 @@ class TestQueries:
 
         mock_pp.get_library.assert_called_once_with(50)
 
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_recommend(self, MockPP, executor):
         mock_pp = MagicMock()
         mock_pp.recommended_songs.return_value = {"tracks": []}
@@ -457,7 +457,7 @@ class TestQueries:
 
         mock_pp.recommended_songs.assert_called_once_with(num_songs=5)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_history_with_limit(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.last_songs_played = ["a", "b", "c", "d", "e"]
@@ -467,7 +467,7 @@ class TestQueries:
 
         assert result["data"] == ["a", "b", "c"]
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_history_no_limit(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.last_songs_played = ["a", "b", "c"]
@@ -479,8 +479,8 @@ class TestQueries:
 
 
 class TestInfoQuery:
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_info_track(self, MockPP, MockSong, executor):
         mock_song = MagicMock()
         mock_song.get_track_info.return_value = {"name": "Bohemian Rhapsody"}
@@ -491,7 +491,7 @@ class TestInfoQuery:
         mock_song.get_track_info.assert_called_once_with("abc123")
         assert result["data"] == {"name": "Bohemian Rhapsody"}
 
-    @patch("spotapi.dsl.executor.Artist")
+    @patch("clautify.dsl.executor.Artist")
     def test_info_artist(self, MockArtist, executor):
         mock_artist = MagicMock()
         mock_artist.get_artist.return_value = {"name": "Queen"}
@@ -502,7 +502,7 @@ class TestInfoQuery:
         mock_artist.get_artist.assert_called_once_with("xyz")
         assert result["data"] == {"name": "Queen"}
 
-    @patch("spotapi.dsl.executor.PublicAlbum")
+    @patch("clautify.dsl.executor.PublicAlbum")
     def test_info_album(self, MockAlbum, executor):
         mock_album = MagicMock()
         mock_album.get_album_info.return_value = {"name": "A Night at the Opera"}
@@ -513,7 +513,7 @@ class TestInfoQuery:
         MockAlbum.assert_called_once_with("abc")
         mock_album.get_album_info.assert_called_once()
 
-    @patch("spotapi.playlist.PublicPlaylist")
+    @patch("clautify.playlist.PublicPlaylist")
     def test_info_playlist(self, MockPubPL, executor):
         mock_pl = MagicMock()
         mock_pl.get_playlist_info.return_value = {"name": "Road Trip"}
@@ -537,9 +537,9 @@ class TestInfoQuery:
 
 
 class TestQueueString:
-    @patch("spotapi.dsl.executor.Player")
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_queue_string_resolves(self, MockPP, MockSong, MockPlayer, executor):
         mock_song = MagicMock()
         mock_song.query_songs.return_value = {
@@ -570,9 +570,9 @@ class TestQueueString:
 class TestEndToEnd:
     """Integration tests: command string → parser → executor → result."""
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_pause_e2e(self, MockPlayer, executor):
-        from spotapi.dsl.parser import parse
+        from clautify.dsl.parser import parse
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
 
@@ -582,9 +582,9 @@ class TestEndToEnd:
         mock_player.pause.assert_called_once()
         assert result["status"] == "ok"
 
-    @patch("spotapi.dsl.executor.Artist")
+    @patch("clautify.dsl.executor.Artist")
     def test_search_e2e(self, MockArtist, executor):
-        from spotapi.dsl.parser import parse
+        from clautify.dsl.parser import parse
         mock_artist = MagicMock()
         mock_artist.query_artists.return_value = {"data": "results"}
         MockArtist.return_value = mock_artist
@@ -596,9 +596,9 @@ class TestEndToEnd:
         assert result["query"] == "search"
         assert result["type"] == "artists"
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_volume_mode_e2e(self, MockPlayer, executor):
-        from spotapi.dsl.parser import parse
+        from clautify.dsl.parser import parse
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
 
@@ -626,8 +626,8 @@ class TestErrorWrapping:
         with pytest.raises(DSLError, match="no action or query"):
             executor.execute({"foo": "bar"})
 
-    @patch("spotapi.dsl.executor.Player")
-    def test_spotapi_exception_wrapped(self, MockPlayer, executor):
+    @patch("clautify.dsl.executor.Player")
+    def test_clautify_exception_wrapped(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.pause.side_effect = RuntimeError("connection lost")
         MockPlayer.return_value = mock_player
@@ -653,7 +653,7 @@ def _make_mock_devices(*name_id_pairs):
 
 
 class TestDeviceResolution:
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_resolve_by_name(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.device_id = "origin"
@@ -666,7 +666,7 @@ class TestDeviceResolution:
 
         mock_player.transfer_player.assert_called_once_with("origin", "br_hex")
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_case_insensitive(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.device_id = "origin"
@@ -677,7 +677,7 @@ class TestDeviceResolution:
 
         mock_player.transfer_player.assert_called_once_with("origin", "ks_hex")
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_unknown_device_error(self, MockPlayer, executor):
         mock_player = MagicMock()
         mock_player.device_ids = _make_mock_devices(("Kitchen", "k_hex"))
@@ -691,7 +691,7 @@ class TestDeviceResolution:
 
 
 class TestVolumeValidation:
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_volume_in_range(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -700,7 +700,7 @@ class TestVolumeValidation:
 
         mock_player.set_volume.assert_called_once_with(0.7)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_volume_zero(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -709,7 +709,7 @@ class TestVolumeValidation:
 
         mock_player.set_volume.assert_called_once_with(0)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_volume_100(self, MockPlayer, executor):
         mock_player = MagicMock()
         MockPlayer.return_value = mock_player
@@ -718,14 +718,14 @@ class TestVolumeValidation:
 
         mock_player.set_volume.assert_called_once_with(1.0)
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_volume_over_100_raises(self, MockPlayer, executor):
         MockPlayer.return_value = MagicMock()
 
         with pytest.raises(DSLError, match="Volume must be 0-100"):
             executor.execute({"action": "pause", "volume": 150})
 
-    @patch("spotapi.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Player")
     def test_volume_negative_raises(self, MockPlayer, executor):
         MockPlayer.return_value = MagicMock()
 
@@ -737,9 +737,9 @@ class TestVolumeValidation:
 
 
 class TestPlayStringWithContext:
-    @patch("spotapi.dsl.executor.Player")
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_string_target_with_uri_context(self, MockPP, MockSong, MockPlayer, executor):
         mock_song = MagicMock()
         mock_song.query_songs.return_value = {
@@ -764,9 +764,9 @@ class TestPlayStringWithContext:
         assert result["resolved_uri"] == "spotify:track:found"
         assert result["context"] == "spotify:playlist:abc"
 
-    @patch("spotapi.dsl.executor.Player")
-    @patch("spotapi.dsl.executor.Song")
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.Player")
+    @patch("clautify.dsl.executor.Song")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_string_target_with_string_context_raises(self, MockPP, MockSong, MockPlayer, executor):
         mock_song = MagicMock()
         mock_song.query_songs.return_value = {
@@ -801,7 +801,7 @@ class TestRecommendValidation:
                 "n": 5,
             })
 
-    @patch("spotapi.dsl.executor.PrivatePlaylist")
+    @patch("clautify.dsl.executor.PrivatePlaylist")
     def test_recommend_playlist_uri_ok(self, MockPP, executor):
         mock_pp = MagicMock()
         mock_pp.recommended_songs.return_value = {"tracks": []}
@@ -821,30 +821,30 @@ class TestRecommendValidation:
 
 class TestParseErrors:
     def test_invalid_command_string(self):
-        from spotapi.dsl import SpotifySession
+        from clautify.dsl import SpotifySession
 
         login = MagicMock()
-        with patch("spotapi.dsl.executor.Player"):
+        with patch("clautify.dsl.executor.Player"):
             session = SpotifySession(login, eager=False)
 
         with pytest.raises(DSLError, match="Invalid command"):
             session.run("explode everything")
 
     def test_parse_error_lists_valid_commands(self):
-        from spotapi.dsl import SpotifySession
+        from clautify.dsl import SpotifySession
 
         login = MagicMock()
-        with patch("spotapi.dsl.executor.Player"):
+        with patch("clautify.dsl.executor.Player"):
             session = SpotifySession(login, eager=False)
 
         with pytest.raises(DSLError, match="Valid commands:"):
             session.run("gibberish xyz 123")
 
     def test_empty_command(self):
-        from spotapi.dsl import SpotifySession
+        from clautify.dsl import SpotifySession
 
         login = MagicMock()
-        with patch("spotapi.dsl.executor.Player"):
+        with patch("clautify.dsl.executor.Player"):
             session = SpotifySession(login, eager=False)
 
         with pytest.raises(DSLError):
@@ -856,7 +856,7 @@ class TestParseErrors:
 
 class TestSessionAuth:
     def test_setup_creates_file(self, tmp_path):
-        from spotapi.dsl import SpotifySession
+        from clautify.dsl import SpotifySession
 
         dest = tmp_path / "session.json"
         result_path = SpotifySession.setup("FAKE_SP_DC_VALUE", path=dest)
@@ -870,14 +870,14 @@ class TestSessionAuth:
         assert data["identifier"] == "default"
 
     def test_setup_empty_sp_dc_raises(self):
-        from spotapi.dsl import SpotifySession
+        from clautify.dsl import SpotifySession
 
         with pytest.raises(DSLError, match="sp_dc cookie value is required"):
             SpotifySession.setup("")
 
-    @patch("spotapi.dsl.Login.from_cookies")
+    @patch("clautify.dsl.Login.from_cookies")
     def test_from_config_loads_session(self, mock_from_cookies, tmp_path):
-        from spotapi.dsl import SpotifySession
+        from clautify.dsl import SpotifySession
 
         mock_login = MagicMock()
         mock_from_cookies.return_value = mock_login
@@ -887,7 +887,7 @@ class TestSessionAuth:
         SpotifySession.setup("FAKE_SP_DC", path=dest)
 
         # Load from config
-        with patch("spotapi.dsl.executor.Player"):
+        with patch("clautify.dsl.executor.Player"):
             session = SpotifySession.from_config(path=dest, eager=False)
 
         # Verify from_cookies was called with correct dump
@@ -897,7 +897,7 @@ class TestSessionAuth:
         assert dump["password"] == ""
 
     def test_from_config_missing_file(self, tmp_path):
-        from spotapi.dsl import SpotifySession
+        from clautify.dsl import SpotifySession
 
         with pytest.raises(DSLError, match="No session file found"):
             SpotifySession.from_config(path=tmp_path / "nonexistent.json")

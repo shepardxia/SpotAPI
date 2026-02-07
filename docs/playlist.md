@@ -21,7 +21,7 @@ Initializes the `PublicPlaylist` class with an optional playlist URI and a `TLSC
 ## Language Support Examples
 
 ```python
-from spotapi import PublicPlaylist
+from clautify import PublicPlaylist
 
 # Initialize with Korean language
 playlist = PublicPlaylist("37i9dQZF1DXcBWIGoYBM5M", language="ko")

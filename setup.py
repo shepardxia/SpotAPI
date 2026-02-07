@@ -18,11 +18,11 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
-    name="spotapi",
-    author="Aran",
+    name="clautify",
+    author="shepardxia",
     description=__description__,
     packages=find_packages(),
-    package_data={"spotapi": ["dsl/grammar.lark"]},
+    package_data={"clautify": ["dsl/grammar.lark"]},
     install_requires=__install_require__,
     extras_require=__extras__,
     keywords=[

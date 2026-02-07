@@ -24,7 +24,7 @@ All major SpotAPI classes now support the `language` parameter:
 ### Initialize with Language
 
 ```python
-from spotapi import Artist, Song, PublicPlaylist, PublicAlbum
+from clautify import Artist, Song, PublicPlaylist, PublicAlbum
 
 # Initialize with Korean language
 artist = Artist(language="ko")
@@ -36,7 +36,7 @@ album = PublicAlbum("4m2880jivSbbyEGAKfITCa", language="ko")
 ### Change Language at Runtime
 
 ```python
-from spotapi import Artist
+from clautify import Artist
 
 # Start with English
 artist = Artist(language="en")
@@ -72,7 +72,7 @@ artist.base.set_language("ko")
 ## Example: Multi-Language Search
 
 ```python
-from spotapi import Song
+from clautify import Song
 
 # Search in Korean
 song_ko = Song(language="ko")

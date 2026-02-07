@@ -24,7 +24,7 @@ Initializes the `Song` class with an optional `PrivatePlaylist` instance and a `
 ## Language Support Examples
 
 ```python
-from spotapi import Song
+from clautify import Song
 
 # Initialize with Korean language
 song_ko = Song(language="ko")
