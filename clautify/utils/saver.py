@@ -3,9 +3,11 @@
 import json
 import os
 from typing import Any, List, Mapping
+
 from readerwriterlock import rwlock
-from clautify.types.interfaces import SaverProtocol
+
 from clautify.exceptions import SaverError
+from clautify.types.interfaces import SaverProtocol
 
 __all__ = ["JSONSaver", "SaverProtocol"]
 
@@ -30,7 +32,7 @@ class JSONSaver(SaverProtocol):
         self.wlock = self.rwlock.gen_wlock()
 
     def __str__(self) -> str:
-        return f"JSONSaver()"
+        return "JSONSaver()"
 
     def save(self, data: List[Mapping[str, Any]], **kwargs) -> None:
         """
@@ -57,11 +59,7 @@ class JSONSaver(SaverProtocol):
                     # Checks if identifier exists
                     if current:
                         current = [
-                            item
-                            for item in current
-                            if not any(
-                                item["identifier"] == d["identifier"] for d in data
-                            )
+                            item for item in current if not any(item["identifier"] == d["identifier"] for d in data)
                         ]
 
             current.extend(data)

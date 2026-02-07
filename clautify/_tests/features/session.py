@@ -1,8 +1,9 @@
-import dotenv
-import pytest
 import os
 
-from clautify import JSONSaver, Login, Config, Logger, solver_clients
+import dotenv
+import pytest
+
+from clautify import Config, JSONSaver, Logger, Login, solver_clients
 
 dotenv.load_dotenv()
 

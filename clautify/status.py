@@ -1,10 +1,11 @@
-import threading
 import functools
+import threading
+from typing import Any, Callable, Dict, List, ParamSpec, TypeVar
+
 from clautify.login import Login
 from clautify.types.annotations import enforce
-from clautify.types.data import PlayerState, Devices, Track
+from clautify.types.data import Devices, PlayerState, Track
 from clautify.websocket import WebsocketStreamer
-from typing import Dict, Any, Callable, List, ParamSpec, TypeVar
 
 __all__ = [
     "PlayerStatus",
@@ -80,10 +81,7 @@ class PlayerStatus(WebsocketStreamer):
         if self._devices is None:
             raise ValueError("Could not get devices")
 
-        if (
-            self._device_dump is None
-            or self._device_dump.get("active_device_id") is None
-        ):
+        if self._device_dump is None or self._device_dump.get("active_device_id") is None:
             raise ValueError("Could not get active device ID")
 
         return Devices.from_dict(self._devices, self._device_dump["active_device_id"])
@@ -96,9 +94,7 @@ class PlayerStatus(WebsocketStreamer):
         if self._devices is None:
             raise ValueError("Could not get devices")
 
-        active_device_id = (
-            self._device_dump.get("active_device_id") if self._device_dump else None
-        )
+        active_device_id = self._device_dump.get("active_device_id") if self._device_dump else None
 
         return Devices.from_dict(
             self._devices,
@@ -110,10 +106,7 @@ class PlayerStatus(WebsocketStreamer):
         """Gets the active device ID of the player."""
         self.renew_state()
 
-        if (
-            self._device_dump is None
-            or self._device_dump.get("active_device_id") is None
-        ):
+        if self._device_dump is None or self._device_dump.get("active_device_id") is None:
             raise ValueError("Could not get active device ID")
 
         return self._device_dump["active_device_id"]
@@ -189,9 +182,7 @@ class EventManager(PlayerStatus):
             if func not in self._subscriptions[event]:
                 self._subscriptions[event].append(func)
             else:
-                raise ValueError(
-                    f"Function {func.__name__} is already subscribed to event '{event}'"
-                )
+                raise ValueError(f"Function {func.__name__} is already subscribed to event '{event}'")
 
     def subscribe(self, event: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
         """

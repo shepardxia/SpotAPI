@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import json
-from clautify.types.annotations import enforce
+from collections.abc import Generator, Mapping
 from typing import Any, Literal
-from collections.abc import Mapping, Generator
+
 from clautify.client import BaseClient
 from clautify.exceptions import ArtistError
 from clautify.http.request import TLSClient
 from clautify.login import Login
-from clautify.client import BaseClient
+from clautify.types.annotations import enforce
 
 __all__ = ["Artist", "ArtistError"]
 
@@ -46,9 +46,7 @@ class Artist:
         self._login: bool = bool(login)
         self.base = BaseClient(client=login.client if (login is not None) else client, language=language)
 
-    def query_artists(
-        self, query: str, /, limit: int = 10, *, offset: int = 0
-    ) -> Mapping[str, Any]:
+    def query_artists(self, query: str, /, limit: int = 10, *, offset: int = 0) -> Mapping[str, Any]:
         """Searches for an artist in the Spotify catalog"""
         url = "https://api-partner.spotify.com/pathfinder/v1/query"
         params = {
@@ -83,9 +81,7 @@ class Artist:
 
         return resp.response
 
-    def get_artist(
-        self, artist_id: str, /, *, locale_code: str = "en"
-    ) -> Mapping[str, Any]:
+    def get_artist(self, artist_id: str, /, *, locale_code: str = "en") -> Mapping[str, Any]:
         """Gets an artist by ID"""
         if "artist:" in artist_id:
             artist_id = artist_id.split("artist:")[-1]
@@ -119,9 +115,7 @@ class Artist:
 
         return resp.response
 
-    def paginate_artists(
-        self, query: str, /
-    ) -> Generator[Mapping[str, Any], None, None]:
+    def paginate_artists(self, query: str, /) -> Generator[Mapping[str, Any], None, None]:
         """
         Generator that fetches artists in chunks
 
@@ -140,9 +134,7 @@ class Artist:
 
         offset = UPPER_LIMIT
         while offset < total_count:
-            yield self.query_artists(query, limit=UPPER_LIMIT, offset=offset)["data"][
-                "searchV2"
-            ]["artists"]["items"]
+            yield self.query_artists(query, limit=UPPER_LIMIT, offset=offset)["data"]["searchV2"]["artists"]["items"]
             offset += UPPER_LIMIT
 
     def _do_follow(

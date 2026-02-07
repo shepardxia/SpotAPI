@@ -1,6 +1,7 @@
 import pytest
-from clautify import PrivatePlaylist, PlaylistError
 from session import _MainFixture
+
+from clautify import PlaylistError, PrivatePlaylist
 
 PUBLIC_PLAYLIST_URI = "40GMAhriYJRO1rsY4YdrZb"
 login_instance = _MainFixture.login
@@ -9,9 +10,7 @@ playlist_instance = PrivatePlaylist(login=login_instance, playlist=PUBLIC_PLAYLI
 
 def test_private_playlist_initialization():
     """Test initialization of the PrivatePlaylist class."""
-    private_playlist = PrivatePlaylist(
-        login=login_instance, playlist=PUBLIC_PLAYLIST_URI
-    )
+    private_playlist = PrivatePlaylist(login=login_instance, playlist=PUBLIC_PLAYLIST_URI)
     assert private_playlist.playlist_id == "40GMAhriYJRO1rsY4YdrZb"
     assert private_playlist._playlist is True
 

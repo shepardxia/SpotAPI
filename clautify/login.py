@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import time
-from typing import Any
 from collections.abc import Mapping
-from clautify.types.annotations import enforce
-from urllib.parse import urlencode, quote
+from typing import Any
+from urllib.parse import quote, urlencode
+
 from clautify.client import RECAPTCHA_SITE_KEY
-from clautify.types import Config, SaverProtocol
 from clautify.exceptions import LoginError
+from clautify.types import Config, SaverProtocol
+from clautify.types.annotations import enforce
 from clautify.utils.strings import parse_json_string
 
 __all__ = ["Login", "LoginChallenge", "LoginError"]
@@ -110,9 +111,7 @@ class Login:
             cookies = cookies  # autotype
 
         if not (cred and cookies):
-            raise ValueError(
-                "Invalid dump format: must contain 'identifier', and 'cookies'"
-            )
+            raise ValueError("Invalid dump format: must contain 'identifier', and 'cookies'")
 
         cfg.client.cookies.clear()
         for k, v in cookies.items():
@@ -124,9 +123,7 @@ class Login:
         return instantiated
 
     @classmethod
-    def from_saver(
-        cls, saver: SaverProtocol, cfg: Config, identifier: str, **kwargs
-    ) -> Login:
+    def from_saver(cls, saver: SaverProtocol, cfg: Config, identifier: str, **kwargs) -> Login:
         """
         Loads a session from a Saver Class.
 
@@ -153,16 +150,10 @@ class Login:
         return f"Login(password={self.password!r}, identifier_credentials={self.identifier_credentials!r})"
 
     def __str__(self) -> str:
-        return (
-            f"Logged in with ID={self.identifier_credentials}, password={self.password}"
-        )
+        return f"Logged in with ID={self.identifier_credentials}, password={self.password}"
 
     def _get_add_cookie(self, _url: str | None = None) -> None:
-        urls = (
-            ["https://open.spotify.com/", "https://pixel.spotify.com/v2/sync?ce=1&pp="]
-            if not _url
-            else [_url]
-        )
+        urls = ["https://open.spotify.com/", "https://pixel.spotify.com/v2/sync?ce=1&pp="] if not _url else [_url]
         for url in urls:
             resp = self.client.get(url)
 
@@ -243,15 +234,13 @@ class Login:
 
         error_type = json_data["error"]
 
-        match (error_type):
+        match error_type:
             case "errorUnknown":
                 raise LoginError("ErrorUnknown, Needs retrying")
             case "errorInvalidCredentials":
-                raise LoginError(
-                    "Invalid Credentials", error=f"{str(self)}: {error_type}"
-                )
+                raise LoginError("Invalid Credentials", error=f"{str(self)}: {error_type}")
             case _:
-                raise LoginError(f"Unforseen Error", error=f"{str(self)}: {error_type}")
+                raise LoginError("Unforseen Error", error=f"{str(self)}: {error_type}")
 
     def login(self) -> None:
         """Preform user login."""
@@ -278,9 +267,7 @@ class Login:
 
         self.logger.info("Solved Captcha", time_taken=f"{int(time.time() - now)}s")
         self._submit_password(captcha_response)
-        self.logger.info(
-            "Logged in successfully", time_taken=f"{int(time.time() - now)}s"
-        )
+        self.logger.info("Logged in successfully", time_taken=f"{int(time.time() - now)}s")
 
 
 class LoginChallenge:

@@ -1,6 +1,7 @@
 import pytest
-from clautify import Player, PlayerError, Login
 from session import _MainFixture
+
+from clautify import Player, PlayerError
 
 player_instance = Player(login=_MainFixture.login)
 

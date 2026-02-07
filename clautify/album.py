@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Generator, Mapping
 from typing import Any
-from collections.abc import Mapping, Generator
-from clautify.types.annotations import enforce
+
+from clautify.client import BaseClient
 from clautify.exceptions import AlbumError
 from clautify.http.request import TLSClient
-from clautify.client import BaseClient
+from clautify.types.annotations import enforce
 
 __all__ = ["PublicAlbum", "AlbumError"]
 
@@ -90,7 +91,5 @@ class PublicAlbum:
 
         offset = UPPER_LIMIT
         while offset < total_count:
-            yield self.get_album_info(limit=UPPER_LIMIT, offset=offset)["data"][
-                "albumUnion"
-            ]["tracksV2"]["items"]
+            yield self.get_album_info(limit=UPPER_LIMIT, offset=offset)["data"]["albumUnion"]["tracksV2"]["items"]
             offset += UPPER_LIMIT

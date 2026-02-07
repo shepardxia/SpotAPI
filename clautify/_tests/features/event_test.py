@@ -1,7 +1,9 @@
 import threading
+
+from session import _MainFixture
+
 from clautify import EventManager
 from clautify.types.data import PlayerState
-from session import _MainFixture
 
 
 def test_event_manager_initialization():

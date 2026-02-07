@@ -1,6 +1,7 @@
-from clautify import PlayerStatus
-from clautify.types.data import PlayerState, Devices, Track
 from session import _MainFixture
+
+from clautify import PlayerStatus
+from clautify.types.data import Devices, PlayerState, Track
 
 
 def test_player_status_initialization():
@@ -12,9 +13,7 @@ def test_player_status_initialization():
     assert player_status._devices is None
 
     device_id = "some_device_id"
-    player_status_with_device = PlayerStatus(
-        login=_MainFixture.login, s_device_id=device_id
-    )
+    player_status_with_device = PlayerStatus(login=_MainFixture.login, s_device_id=device_id)
     assert player_status_with_device.device_id == device_id
 
 
@@ -55,10 +54,7 @@ def test_saved_device_ids():
 
     assert isinstance(player_status.saved_device_ids, Devices)
     assert player_status._device_dump
-    assert (
-        player_status.saved_device_ids.active_device_id
-        == player_status._device_dump["active_device_id"]
-    )
+    assert player_status.saved_device_ids.active_device_id == player_status._device_dump["active_device_id"]
 
 
 def test_device_ids():
@@ -68,10 +64,7 @@ def test_device_ids():
 
     assert isinstance(player_status.device_ids, Devices)
     assert player_status._device_dump
-    assert (
-        player_status.device_ids.active_device_id
-        == player_status._device_dump["active_device_id"]
-    )
+    assert player_status.device_ids.active_device_id == player_status._device_dump["active_device_id"]
 
 
 def test_active_device_id():
@@ -80,9 +73,7 @@ def test_active_device_id():
     player_status.renew_state()
 
     assert player_status._device_dump
-    assert (
-        player_status.active_device_id == player_status._device_dump["active_device_id"]
-    )
+    assert player_status.active_device_id == player_status._device_dump["active_device_id"]
 
 
 def test_next_song_in_queue():

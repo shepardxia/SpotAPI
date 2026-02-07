@@ -1,10 +1,30 @@
 """Tests for the DSL parser — pure parsing, no network calls."""
 
 import pytest
+
 from clautify.dsl.parser import parse
 
+# ── Simple keyword actions ───────────────────────────────────────
 
-# ── Playback Actions ──────────────────────────────────────────────
+
+@pytest.mark.parametrize(
+    "cmd, expected",
+    [
+        ("pause", {"action": "pause"}),
+        ("resume", {"action": "resume"}),
+        ("like spotify:track:abc", {"action": "like", "target": "spotify:track:abc"}),
+        ("unlike spotify:track:abc", {"action": "unlike", "target": "spotify:track:abc"}),
+        ("follow spotify:artist:abc", {"action": "follow", "target": "spotify:artist:abc"}),
+        ("unfollow spotify:artist:abc", {"action": "unfollow", "target": "spotify:artist:abc"}),
+        ("save spotify:playlist:abc", {"action": "save", "target": "spotify:playlist:abc"}),
+        ("unsave spotify:playlist:abc", {"action": "unsave", "target": "spotify:playlist:abc"}),
+    ],
+)
+def test_simple_keyword_actions(cmd, expected):
+    assert parse(cmd) == expected
+
+
+# ── Play action ──────────────────────────────────────────────────
 
 
 class TestPlayAction:
@@ -20,14 +40,14 @@ class TestPlayAction:
             "target": "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",
         }
 
-    def test_play_with_context(self):
+    def test_play_with_uri_context(self):
         assert parse("play spotify:track:abc in spotify:playlist:def") == {
             "action": "play",
             "target": "spotify:track:abc",
             "context": "spotify:playlist:def",
         }
 
-    def test_play_string_with_context(self):
+    def test_play_with_string_context(self):
         assert parse('play "Dark Side" in "Classic Rock"') == {
             "action": "play",
             "target": "Dark Side",
@@ -35,12 +55,7 @@ class TestPlayAction:
         }
 
 
-class TestPauseResume:
-    def test_pause(self):
-        assert parse("pause") == {"action": "pause"}
-
-    def test_resume(self):
-        assert parse("resume") == {"action": "resume"}
+# ── Skip / Seek / Queue ─────────────────────────────────────────
 
 
 class TestSkip:
@@ -54,74 +69,22 @@ class TestSkip:
         assert parse("skip -1") == {"action": "skip", "n": -1}
 
 
-class TestSeek:
-    def test_seek(self):
-        assert parse("seek 30000") == {"action": "seek", "position_ms": 30000.0}
-
-    def test_seek_zero(self):
-        assert parse("seek 0") == {"action": "seek", "position_ms": 0.0}
+def test_seek():
+    assert parse("seek 30000") == {"action": "seek", "position_ms": 30000.0}
 
 
-class TestQueue:
-    def test_queue_uri(self):
-        assert parse("queue spotify:track:abc123") == {
-            "action": "queue",
-            "target": "spotify:track:abc123",
-        }
-
-    def test_queue_string(self):
-        assert parse('queue "Stairway to Heaven"') == {
-            "action": "queue",
-            "target": "Stairway to Heaven",
-        }
+@pytest.mark.parametrize(
+    "cmd, expected",
+    [
+        ("queue spotify:track:abc", {"action": "queue", "target": "spotify:track:abc"}),
+        ('queue "Stairway to Heaven"', {"action": "queue", "target": "Stairway to Heaven"}),
+    ],
+)
+def test_queue(cmd, expected):
+    assert parse(cmd) == expected
 
 
-# ── Library Actions ───────────────────────────────────────────────
-
-
-class TestLikeUnlike:
-    def test_like_uri(self):
-        assert parse("like spotify:track:abc123") == {
-            "action": "like",
-            "target": "spotify:track:abc123",
-        }
-
-    def test_unlike_uri(self):
-        assert parse("unlike spotify:track:abc123") == {
-            "action": "unlike",
-            "target": "spotify:track:abc123",
-        }
-
-
-class TestFollowUnfollow:
-    def test_follow(self):
-        assert parse("follow spotify:artist:abc123") == {
-            "action": "follow",
-            "target": "spotify:artist:abc123",
-        }
-
-    def test_unfollow(self):
-        assert parse("unfollow spotify:artist:abc123") == {
-            "action": "unfollow",
-            "target": "spotify:artist:abc123",
-        }
-
-
-class TestSaveUnsave:
-    def test_save(self):
-        assert parse("save spotify:playlist:abc123") == {
-            "action": "save",
-            "target": "spotify:playlist:abc123",
-        }
-
-    def test_unsave(self):
-        assert parse("unsave spotify:playlist:abc123") == {
-            "action": "unsave",
-            "target": "spotify:playlist:abc123",
-        }
-
-
-# ── Playlist Actions ──────────────────────────────────────────────
+# ── Playlist CRUD ────────────────────────────────────────────────
 
 
 class TestPlaylistCRUD:
@@ -165,29 +128,27 @@ class TestPlaylistCRUD:
         }
 
 
-# ── State Modifiers ───────────────────────────────────────────────
+# ── State Modifiers ──────────────────────────────────────────────
 
 
-class TestStateModifiers:
-    def test_standalone_volume(self):
-        assert parse("volume 70") == {"action": "set", "volume": 70.0}
+@pytest.mark.parametrize(
+    "cmd, expected",
+    [
+        ("volume 70", {"action": "set", "volume": 70.0}),
+        ("mode shuffle", {"action": "set", "mode": "shuffle"}),
+        ("mode repeat", {"action": "set", "mode": "repeat"}),
+        ("mode normal", {"action": "set", "mode": "normal"}),
+        ("mode SHUFFLE", {"action": "set", "mode": "shuffle"}),
+        ('on "Living Room"', {"action": "set", "device": "Living Room"}),
+        ('device "Bedroom"', {"action": "set", "device": "Bedroom"}),
+    ],
+)
+def test_standalone_modifiers(cmd, expected):
+    assert parse(cmd) == expected
 
-    def test_standalone_mode_shuffle(self):
-        assert parse("mode shuffle") == {"action": "set", "mode": "shuffle"}
 
-    def test_standalone_mode_repeat(self):
-        assert parse("mode repeat") == {"action": "set", "mode": "repeat"}
-
-    def test_standalone_mode_normal(self):
-        assert parse("mode normal") == {"action": "set", "mode": "normal"}
-
-    def test_standalone_device(self):
-        assert parse('on "Living Room"') == {"action": "set", "device": "Living Room"}
-
-    def test_standalone_device_keyword(self):
-        assert parse('device "Bedroom"') == {"action": "set", "device": "Bedroom"}
-
-    def test_multiple_standalone_modifiers(self):
+class TestModifierComposition:
+    def test_multiple_standalone(self):
         assert parse('volume 50 on "Bedroom"') == {
             "action": "set",
             "volume": 50.0,
@@ -225,95 +186,69 @@ class TestStateModifiers:
         }
 
 
-# ── Queries ───────────────────────────────────────────────────────
+@pytest.mark.parametrize(
+    "cmd, expected",
+    [
+        ("volume +10", {"action": "set", "volume_rel": 10}),
+        ("volume -5", {"action": "set", "volume_rel": -5}),
+        ('play "jazz" volume +10', {"action": "play", "target": "jazz", "volume_rel": 10}),
+    ],
+)
+def test_volume_rel(cmd, expected):
+    assert parse(cmd) == expected
 
 
-class TestSearch:
-    def test_search_default(self):
-        assert parse('search "taylor swift"') == {
-            "query": "search",
-            "term": "taylor swift",
-        }
-
-    def test_search_tracks(self):
-        assert parse('search "jazz" tracks') == {
-            "query": "search",
-            "term": "jazz",
-            "type": "tracks",
-        }
-
-    def test_search_artists(self):
-        assert parse('search "jazz" artists') == {
-            "query": "search",
-            "term": "jazz",
-            "type": "artists",
-        }
-
-    def test_search_albums(self):
-        assert parse('search "jazz" albums') == {
-            "query": "search",
-            "term": "jazz",
-            "type": "albums",
-        }
-
-    def test_search_playlists(self):
-        assert parse('search "lo-fi" playlists') == {
-            "query": "search",
-            "term": "lo-fi",
-            "type": "playlists",
-        }
+# ── Queries ──────────────────────────────────────────────────────
 
 
-class TestOtherQueries:
-    def test_now_playing(self):
-        assert parse("now playing") == {"query": "now_playing"}
+@pytest.mark.parametrize(
+    "cmd, expected",
+    [
+        ('search "jazz"', {"query": "search", "term": "jazz"}),
+        ('search "jazz" tracks', {"query": "search", "term": "jazz", "type": "tracks"}),
+        ('search "jazz" artists', {"query": "search", "term": "jazz", "type": "artists"}),
+        ('search "jazz" albums', {"query": "search", "term": "jazz", "type": "albums"}),
+        ('search "lo-fi" playlists', {"query": "search", "term": "lo-fi", "type": "playlists"}),
+        ('search "jazz" ARTISTS', {"query": "search", "term": "jazz", "type": "artists"}),
+    ],
+)
+def test_search(cmd, expected):
+    assert parse(cmd) == expected
 
-    def test_get_queue(self):
-        assert parse("get queue") == {"query": "get_queue"}
 
-    def test_get_devices(self):
-        assert parse("get devices") == {"query": "get_devices"}
-
-    def test_library(self):
-        assert parse("library") == {"query": "library"}
-
-    def test_library_artists(self):
-        assert parse("library artists") == {"query": "library", "type": "artists"}
-
-    def test_library_tracks(self):
-        assert parse("library tracks") == {"query": "library", "type": "tracks"}
-
-    def test_info_track(self):
-        assert parse("info spotify:track:abc123") == {
-            "query": "info",
-            "target": "spotify:track:abc123",
-        }
-
-    def test_info_artist(self):
-        assert parse("info spotify:artist:abc123") == {
-            "query": "info",
-            "target": "spotify:artist:abc123",
-        }
-
-    def test_history(self):
-        assert parse("history") == {"query": "history"}
+@pytest.mark.parametrize(
+    "cmd, expected",
+    [
+        ("now playing", {"query": "now_playing"}),
+        ("get queue", {"query": "get_queue"}),
+        ("get devices", {"query": "get_devices"}),
+        ("library", {"query": "library"}),
+        ("library artists", {"query": "library", "type": "artists"}),
+        ("library tracks", {"query": "library", "type": "tracks"}),
+        ("history", {"query": "history"}),
+        ("info spotify:track:abc", {"query": "info", "target": "spotify:track:abc"}),
+        ("info spotify:artist:abc", {"query": "info", "target": "spotify:artist:abc"}),
+    ],
+)
+def test_simple_queries(cmd, expected):
+    assert parse(cmd) == expected
 
 
 class TestRecommend:
-    def test_recommend_with_count(self):
-        assert parse("recommend 5 for spotify:playlist:abc123") == {
+    def test_with_count(self):
+        assert parse("recommend 5 for spotify:playlist:abc") == {
             "query": "recommend",
             "n": 5,
-            "target": "spotify:playlist:abc123",
+            "target": "spotify:playlist:abc",
         }
 
-    def test_recommend_default_count(self):
-        assert parse("recommend for spotify:playlist:abc123") == {
+    def test_default_count(self):
+        assert parse("recommend for spotify:playlist:abc") == {
             "query": "recommend",
-            "target": "spotify:playlist:abc123",
+            "target": "spotify:playlist:abc",
         }
 
-    def test_recommend_string_target(self):
+    def test_string_target(self):
         assert parse('recommend 10 for "Road Trip"') == {
             "query": "recommend",
             "n": 10,
@@ -321,39 +256,20 @@ class TestRecommend:
         }
 
 
-# ── Query Modifiers ───────────────────────────────────────────────
+# ── Query Modifiers ──────────────────────────────────────────────
 
 
-class TestQueryModifiers:
-    def test_search_with_limit(self):
-        assert parse('search "jazz" artists limit 5') == {
-            "query": "search",
-            "term": "jazz",
-            "type": "artists",
-            "limit": 5,
-        }
-
-    def test_search_with_limit_and_offset(self):
-        assert parse('search "rock" limit 20 offset 40') == {
-            "query": "search",
-            "term": "rock",
-            "limit": 20,
-            "offset": 40,
-        }
-
-    def test_library_with_limit(self):
-        assert parse("library tracks limit 20 offset 40") == {
-            "query": "library",
-            "type": "tracks",
-            "limit": 20,
-            "offset": 40,
-        }
-
-    def test_history_with_limit(self):
-        assert parse("history limit 10") == {
-            "query": "history",
-            "limit": 10,
-        }
+@pytest.mark.parametrize(
+    "cmd, expected",
+    [
+        ('search "jazz" artists limit 5', {"query": "search", "term": "jazz", "type": "artists", "limit": 5}),
+        ('search "rock" limit 20 offset 40', {"query": "search", "term": "rock", "limit": 20, "offset": 40}),
+        ("library tracks limit 20 offset 40", {"query": "library", "type": "tracks", "limit": 20, "offset": 40}),
+        ("history limit 10", {"query": "history", "limit": 10}),
+    ],
+)
+def test_query_modifiers(cmd, expected):
+    assert parse(cmd) == expected
 
 
 # ── Grammar Enforcement ──────────────────────────────────────────
@@ -361,12 +277,10 @@ class TestQueryModifiers:
 
 class TestGrammarEnforcement:
     def test_state_modifier_on_query_is_error(self):
-        """State modifiers should NOT compose with queries."""
         with pytest.raises(Exception):
             parse('search "jazz" volume 70')
 
     def test_query_modifier_on_action_is_error(self):
-        """Query modifiers should NOT compose with actions."""
         with pytest.raises(Exception):
             parse('play "jazz" limit 5')
 
@@ -377,18 +291,3 @@ class TestGrammarEnforcement:
     def test_empty_string(self):
         with pytest.raises(Exception):
             parse("")
-
-
-# ── Case Insensitivity ───────────────────────────────────────────
-
-
-class TestCaseInsensitivity:
-    def test_type_case_insensitive(self):
-        assert parse('search "jazz" ARTISTS') == {
-            "query": "search",
-            "term": "jazz",
-            "type": "artists",
-        }
-
-    def test_mode_case_insensitive(self):
-        assert parse("mode SHUFFLE") == {"action": "set", "mode": "shuffle"}

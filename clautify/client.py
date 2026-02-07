@@ -1,27 +1,26 @@
-import time
-import json
-import base64
-import pyotp
 import atexit
-import requests
-from typing import Tuple, Literal
+import base64
+import json
+import time
 from collections.abc import Mapping
-from clautify.utils.logger import Logger
-from clautify.utils.logger import Logger
-from clautify.types.annotations import enforce
-from clautify.types.alias import _UStr, _Undefined
+from typing import Literal, Tuple
+
+import pyotp
+import requests
+
 from clautify.exceptions import BaseClientError
 from clautify.http.request import TLSClient
-from clautify.utils.strings import extract_js_links, extract_mappings, combine_chunks
+from clautify.types.alias import _Undefined, _UStr
+from clautify.types.annotations import enforce
+from clautify.utils.logger import Logger
+from clautify.utils.strings import combine_chunks, extract_js_links, extract_mappings
 
 # Default recaptcha site key, will update on startup if necessary
 RECAPTCHA_SITE_KEY: str = "6LfCVLAUAAAAALFwwRnnCJ12DalriUGbj8FW_J39"
 # Fallback hardcoded secret (version 18)
 _FALLBACK_SECRET: Tuple[Literal[18], bytearray] = (
     18,
-    bytearray(
-        [70, 60, 33, 57, 92, 120, 90, 33, 32, 62, 62, 55, 126, 93, 66, 35, 108, 68]
-    ),
+    bytearray([70, 60, 33, 57, 92, 120, 90, 33, 32, 62, 62, 55, 126, 93, 66, 35, 108, 68]),
 )
 
 # Cache storage for TOTP
@@ -49,9 +48,7 @@ def get_latest_totp_secret() -> Tuple[int, bytearray]:
         secret_list = secrets[version]
 
         if not isinstance(secret_list, list):
-            raise BaseClientError(
-                f"Expected a list of integers, got {type(secret_list)}"
-            )
+            raise BaseClientError(f"Expected a list of integers, got {type(secret_list)}")
 
         _secret_cache = (version, bytearray(secret_list))
         _cache_expiry = time.time() + _CACHE_TTL
@@ -138,9 +135,7 @@ class BaseClient:
             resp = self.client.get("https://open.spotify.com/api/token", params=query)
 
             if resp.fail:
-                raise BaseClientError(
-                    "Could not get session auth tokens", error=resp.error.string
-                )
+                raise BaseClientError("Could not get session auth tokens", error=resp.error.string)
 
             self.access_token = resp.response["accessToken"]
             self.client_id = resp.response["clientId"]
@@ -152,20 +147,14 @@ class BaseClient:
 
         _all_js_packs = extract_js_links(resp.response)
         self.js_pack = next(
-            (
-                link
-                for link in _all_js_packs
-                if "web-player/web-player" in link and link.endswith(".js")
-            ),
+            (link for link in _all_js_packs if "web-player/web-player" in link and link.endswith(".js")),
             "",
         )
 
-        self._raw_app_server_config = resp.response.split(
-            '<script id="appServerConfig" type="text/plain">'
-        )[1].split("</script>")[0]
-        self.server_cfg = json.loads(
-            base64.b64decode(self._raw_app_server_config).decode("utf-8")
-        )
+        self._raw_app_server_config = resp.response.split('<script id="appServerConfig" type="text/plain">')[1].split(
+            "</script>"
+        )[0]
+        self.server_cfg = json.loads(base64.b64decode(self._raw_app_server_config).decode("utf-8"))
 
         _recaptcha_key = self.server_cfg["recaptchaWebPlayerFraudSiteKey"]
         if _recaptcha_key:
@@ -207,9 +196,7 @@ class BaseClient:
             raise BaseClientError("Could not get client token", error=resp.error.string)
 
         if resp.response.get("response_type") != "RESPONSE_GRANTED_TOKEN_RESPONSE":
-            raise BaseClientError(
-                "Could not get client token", error=resp.response.get("response_type")
-            )
+            raise BaseClientError("Could not get client token", error=resp.response.get("response_type"))
 
         if not isinstance(resp.response, Mapping):
             raise BaseClientError("Invalid JSON")
@@ -237,9 +224,7 @@ class BaseClient:
 
         resp = self.client.get(str(self.js_pack))
         if resp.fail:
-            raise BaseClientError(
-                "Could not get general hashes", error=resp.error.string
-            )
+            raise BaseClientError("Could not get general hashes", error=resp.error.string)
 
         self.raw_hashes = resp.response
 
@@ -252,9 +237,7 @@ class BaseClient:
         for url in urls:
             resp = self.client.get(url)
             if resp.fail:
-                raise BaseClientError(
-                    "Could not get general hashes", error=resp.error.string
-                )
+                raise BaseClientError("Could not get general hashes", error=resp.error.string)
 
             self.raw_hashes += resp.response
 

@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Type, Dict
-from tls_client.settings import ClientIdentifiers
-from tls_client.exceptions import TLSClientExeption
-from tls_client.response import Response as TLSResponse
-from clautify.exceptions import ParentException, RequestError
-from clautify.http.data import Response
-from tls_client import Session
-import requests
 import atexit
 import json
+from typing import Any, Callable, Dict, Type
+
+import requests
+from tls_client import Session
+from tls_client.exceptions import TLSClientExeption
+from tls_client.response import Response as TLSResponse
+from tls_client.settings import ClientIdentifiers
+
+from clautify.exceptions import ParentException, RequestError
+from clautify.http.data import Response
 
 __all__ = [
     "StdClient",
@@ -45,15 +47,9 @@ class StdClient:
     def __call__(self, method: str, url: str, **kwargs) -> requests.Response | None:
         return self.build_request(method, url, **kwargs)
 
-    def build_request(
-        self, method: str, url: str | bytes, **kwargs
-    ) -> requests.Response | None:
+    def build_request(self, method: str, url: str | bytes, **kwargs) -> requests.Response | None:
         if isinstance(url, (bytes, memoryview)):
-            url = (
-                url.tobytes().decode("utf-8")
-                if isinstance(url, memoryview)
-                else url.decode("utf-8")
-            )
+            url = url.tobytes().decode("utf-8") if isinstance(url, memoryview) else url.decode("utf-8")
 
         err = "Unknown"
         for _ in range(self.auto_retries):
@@ -79,9 +75,7 @@ class StdClient:
 
         return Response(status_code=response.status_code, response=body, raw=response)
 
-    def request(
-        self, method: str, url: str | bytes, *, authenticate: bool = False, **kwargs
-    ) -> Response:
+    def request(self, method: str, url: str | bytes, *, authenticate: bool = False, **kwargs) -> Response:
         if authenticate and self.authenticate:
             kwargs = self.authenticate(kwargs)
 
@@ -92,19 +86,13 @@ class StdClient:
         else:
             raise RequestError("Request kept failing after retries.")
 
-    def post(
-        self, url: str | bytes, *, authenticate: bool = False, **kwargs
-    ) -> Response:
+    def post(self, url: str | bytes, *, authenticate: bool = False, **kwargs) -> Response:
         return self.request("POST", url, authenticate=authenticate, **kwargs)
 
-    def get(
-        self, url: str | bytes, *, authenticate: bool = False, **kwargs
-    ) -> Response:
+    def get(self, url: str | bytes, *, authenticate: bool = False, **kwargs) -> Response:
         return self.request("GET", url, authenticate=authenticate, **kwargs)
 
-    def put(
-        self, url: str | bytes, *, authenticate: bool = False, **kwargs
-    ) -> Response:
+    def put(self, url: str | bytes, *, authenticate: bool = False, **kwargs) -> Response:
         return self.request("PUT", url, authenticate=authenticate, **kwargs)
 
 
@@ -136,15 +124,9 @@ class TLSClient(Session):
     def __call__(self, method: str, url: str, **kwargs) -> TLSResponse | None:
         return self.build_request(method, url, **kwargs)
 
-    def build_request(
-        self, method: str, url: str | bytes, **kwargs
-    ) -> TLSResponse | None:
+    def build_request(self, method: str, url: str | bytes, **kwargs) -> TLSResponse | None:
         if isinstance(url, (bytes, memoryview)):
-            url = (
-                url.tobytes().decode("utf-8")
-                if isinstance(url, memoryview)
-                else url.decode("utf-8")
-            )
+            url = url.tobytes().decode("utf-8") if isinstance(url, memoryview) else url.decode("utf-8")
 
         err = "Unknown"
         for _ in range(self.auto_retries):
@@ -158,9 +140,7 @@ class TLSClient(Session):
 
         raise RequestError("Failed to complete request.", error=err)
 
-    def parse_response(
-        self, response: TLSResponse, method: str, danger: bool
-    ) -> Response:
+    def parse_response(self, response: TLSResponse, method: str, danger: bool) -> Response:
         body: str | Dict[Any, Any] | None = response.text
         headers = {key.lower(): value for key, value in response.headers.items()}
 
@@ -183,9 +163,7 @@ class TLSClient(Session):
         # Why is status_code a None type...
         assert response.status_code is not None, "Status Code is None"
 
-        resp = Response(
-            status_code=int(response.status_code), response=body, raw=response
-        )
+        resp = Response(status_code=int(response.status_code), response=body, raw=response)
 
         if danger and self.fail_exception and resp.fail:
             raise self.fail_exception(
@@ -195,9 +173,7 @@ class TLSClient(Session):
 
         return resp
 
-    def get(
-        self, url: str | bytes, *, authenticate: bool = False, **kwargs
-    ) -> Response:
+    def get(self, url: str | bytes, *, authenticate: bool = False, **kwargs) -> Response:
         """Routes a GET Request"""
         if authenticate and self.authenticate is not None:
             kwargs = self.authenticate(kwargs)

@@ -1,7 +1,7 @@
 import pytest
-from clautify import Artist, ArtistError
 from session import _MainFixture
 
+from clautify import Artist, ArtistError
 
 instance = Artist(login=_MainFixture.login)
 
@@ -10,15 +10,11 @@ def test_artist_initialization():
     """Test the initialization of the Artist class."""
     artist_with_login = Artist(login=_MainFixture.login)
     assert artist_with_login._login is True
-    assert isinstance(
-        artist_with_login.base.client, _MainFixture.login.client.__class__
-    )
+    assert isinstance(artist_with_login.base.client, _MainFixture.login.client.__class__)
 
     artist_without_login = Artist()
     assert artist_without_login._login is False
-    assert isinstance(
-        artist_without_login.base.client, _MainFixture.login.client.__class__
-    )
+    assert isinstance(artist_without_login.base.client, _MainFixture.login.client.__class__)
 
 
 def test_query_artists_with_login():

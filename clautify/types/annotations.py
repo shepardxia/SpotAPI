@@ -1,17 +1,17 @@
-import inspect
 import functools
-from collections.abc import Iterable, Sequence, Mapping, Generator
+import inspect
+from collections.abc import Generator, Iterable, Mapping, Sequence
 from typing import (
     Any,
     Callable,
     Dict,
     Optional,
-    TypeVar,
     ParamSpec,
+    Type,
+    TypeVar,
+    Union,
     get_args,
     get_origin,
-    Type,
-    Union,
 )
 
 __all__ = ["enforce_types", "EnforceMeta", "enforce"]
@@ -48,8 +48,7 @@ def enforce_types(func: Callable[P, R]) -> Callable[P, R]:
 
         if return_type is not None and not is_instance_of(result, return_type):
             raise TypeError(
-                f"Return value must be of type {format_type(return_type)}, "
-                f"but got {format_type(type(result))}"
+                f"Return value must be of type {format_type(return_type)}, but got {format_type(type(result))}"
             )
 
         return result
@@ -76,9 +75,7 @@ def is_instance_of(value: Any, expected_type: Any) -> bool:
             return any(is_instance_of(value, t) for t in args)
 
         case _ if origin is list:
-            return isinstance(value, list) and all(
-                is_instance_of(item, args[0]) for item in value
-            )
+            return isinstance(value, list) and all(is_instance_of(item, args[0]) for item in value)
 
         case _ if origin is tuple:
             return (
@@ -89,8 +86,7 @@ def is_instance_of(value: Any, expected_type: Any) -> bool:
 
         case _ if origin is dict:
             return isinstance(value, dict) and all(
-                is_instance_of(k, args[0]) and is_instance_of(v, args[1])
-                for k, v in value.items()
+                is_instance_of(k, args[0]) and is_instance_of(v, args[1]) for k, v in value.items()
             )
 
         case _ if origin is Sequence:
@@ -191,9 +187,7 @@ class EnforceMeta(type):
     I have came to the conclusion that this is not needed due to its complexity with inheritance.
     """
 
-    def __new__(
-        cls: Type[type], name: str, bases: tuple[type, ...], dct: Dict[str, Any]
-    ) -> type:
+    def __new__(cls: Type[type], name: str, bases: tuple[type, ...], dct: Dict[str, Any]) -> type:
         for attr_name, attr_value in dct.items():
             if callable(attr_value) and not attr_name.startswith("__"):
                 dct[attr_name] = enforce_types(attr_value)

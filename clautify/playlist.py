@@ -3,14 +3,15 @@ from __future__ import annotations
 import json
 import re
 import time
+from collections.abc import Generator, Mapping
 from typing import Any
-from clautify.login import Login
-from clautify.user import User
+
 from clautify.client import BaseClient
-from collections.abc import Mapping, Generator
-from clautify.types.annotations import enforce
 from clautify.exceptions import PlaylistError
 from clautify.http.request import TLSClient
+from clautify.login import Login
+from clautify.types.annotations import enforce
+from clautify.user import User
 
 __all__ = ["PublicPlaylist", "PrivatePlaylist", "PlaylistError"]
 
@@ -42,9 +43,7 @@ class PublicPlaylist:
         language: str = "en",
     ) -> None:
         self.base = BaseClient(client=client, language=language)
-        self.playlist_id = (
-            playlist.split("playlist/")[-1] if "playlist" in playlist else playlist
-        )
+        self.playlist_id = playlist.split("playlist/")[-1] if "playlist" in playlist else playlist
         self.playlist_link = f"https://open.spotify.com/playlist/{self.playlist_id}"
 
     def get_playlist_info(
@@ -104,9 +103,7 @@ class PublicPlaylist:
 
         offset = UPPER_LIMIT
         while offset < total_count:
-            yield self.get_playlist_info(limit=UPPER_LIMIT, offset=offset)["data"][
-                "playlistV2"
-            ]["content"]
+            yield self.get_playlist_info(limit=UPPER_LIMIT, offset=offset)["data"]["playlistV2"]["content"]
             offset += UPPER_LIMIT
 
 
@@ -139,9 +136,7 @@ class PrivatePlaylist:
             raise ValueError("Must be logged in")
 
         if playlist:
-            self.playlist_id = (
-                playlist.split("playlist/")[-1] if "playlist" in playlist else playlist
-            )
+            self.playlist_id = playlist.split("playlist/")[-1] if "playlist" in playlist else playlist
 
         self.base = BaseClient(login.client, language=language)
         self.login = login
@@ -197,9 +192,7 @@ class PrivatePlaylist:
         resp = self.login.client.post(url, json=payload, authenticate=True)
 
         if resp.fail:
-            raise PlaylistError(
-                "Could not add playlist to library", error=resp.error.string
-            )
+            raise PlaylistError("Could not add playlist to library", error=resp.error.string)
 
     def remove_from_library(self) -> None:
         """Removes the playlist from your library"""
@@ -214,9 +207,7 @@ class PrivatePlaylist:
                         {
                             "kind": 3,
                             "rem": {
-                                "items": [
-                                    {"uri": f"spotify:playlist:{self.playlist_id}"}
-                                ],
+                                "items": [{"uri": f"spotify:playlist:{self.playlist_id}"}],
                                 "itemsAsKey": True,
                             },
                         }
@@ -232,9 +223,7 @@ class PrivatePlaylist:
         resp = self.login.client.post(url, json=payload, authenticate=True)
 
         if resp.fail:
-            raise PlaylistError(
-                "Could not remove playlist from library", error=resp.error.string
-            )
+            raise PlaylistError("Could not remove playlist from library", error=resp.error.string)
 
     def delete_playlist(self) -> None:
         """Deletes the playlist from your library"""
@@ -300,9 +289,7 @@ class PrivatePlaylist:
         resp = self.login.client.post(url, json=payload, authenticate=True)
 
         if resp.fail:
-            raise PlaylistError(
-                "Could not stage create playlist", error=resp.error.string
-            )
+            raise PlaylistError("Could not stage create playlist", error=resp.error.string)
 
         pattern = r"spotify:playlist:[a-zA-Z0-9]+"
         matched = re.search(pattern, resp.response)
@@ -363,8 +350,6 @@ class PrivatePlaylist:
         resp = self.login.client.post(url, json=payload, authenticate=True)
 
         if resp.fail:
-            raise PlaylistError(
-                "Could not get recommended songs", error=resp.error.string
-            )
+            raise PlaylistError("Could not get recommended songs", error=resp.error.string)
 
         return resp.response

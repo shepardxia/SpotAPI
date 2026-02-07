@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Union
+
 from clautify.http.request import TLSClient
-from typing import List, Dict, Any, Union
 from clautify.types.interfaces import CaptchaProtocol, LoggerProtocol
 
 __all__ = [
@@ -68,9 +69,7 @@ class Metadata:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Metadata":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -89,9 +88,7 @@ class Track:
         metadata = data.get("metadata", {})
         if isinstance(metadata, dict):
             data["metadata"] = Metadata.from_dict(metadata)
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -105,9 +102,7 @@ class Index:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Index":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -123,9 +118,7 @@ class PlayOrigin:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "PlayOrigin":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -139,9 +132,7 @@ class Restrictions:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Restrictions":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -156,9 +147,7 @@ class Options:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Options":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -174,9 +163,7 @@ class PlaybackQuality:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "PlaybackQuality":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -194,9 +181,7 @@ class ContextMetadata:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ContextMetadata":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -232,13 +217,9 @@ class PlayerState:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "PlayerState":
-        valid_keys = {
-            key: data[key] for key in cls.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in cls.__annotations__.keys() if key in data}
         if "play_origin" in valid_keys:
-            valid_keys["play_origin"] = PlayOrigin.from_dict(
-                valid_keys.get("play_origin", {})
-            )
+            valid_keys["play_origin"] = PlayOrigin.from_dict(valid_keys.get("play_origin", {}))
         if "index" in valid_keys:
             valid_keys["index"] = Index.from_dict(valid_keys.get("index", {}))
         if "track" in valid_keys:
@@ -246,25 +227,15 @@ class PlayerState:
         if "options" in valid_keys:
             valid_keys["options"] = Options.from_dict(valid_keys.get("options", {}))
         if "restrictions" in valid_keys:
-            valid_keys["restrictions"] = Restrictions.from_dict(
-                valid_keys.get("restrictions", {})
-            )
+            valid_keys["restrictions"] = Restrictions.from_dict(valid_keys.get("restrictions", {}))
         if "prev_tracks" in valid_keys:
-            valid_keys["prev_tracks"] = [
-                Track.from_dict(track) for track in valid_keys.get("prev_tracks", [])
-            ]
+            valid_keys["prev_tracks"] = [Track.from_dict(track) for track in valid_keys.get("prev_tracks", [])]
         if "next_tracks" in valid_keys:
-            valid_keys["next_tracks"] = [
-                Track.from_dict(track) for track in valid_keys.get("next_tracks", [])
-            ]
+            valid_keys["next_tracks"] = [Track.from_dict(track) for track in valid_keys.get("next_tracks", [])]
         if "context_metadata" in valid_keys:
-            valid_keys["context_metadata"] = ContextMetadata.from_dict(
-                valid_keys.get("context_metadata", {})
-            )
+            valid_keys["context_metadata"] = ContextMetadata.from_dict(valid_keys.get("context_metadata", {}))
         if "playback_quality" in valid_keys:
-            valid_keys["playback_quality"] = PlaybackQuality.from_dict(
-                valid_keys.get("playback_quality", {})
-            )
+            valid_keys["playback_quality"] = PlaybackQuality.from_dict(valid_keys.get("playback_quality", {}))
         return cls(**valid_keys)
 
     def __str__(self) -> str:
@@ -280,9 +251,7 @@ class Hifi:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "Hifi":
-        valid_keys = {
-            key: data[key] for key in Hifi.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in Hifi.__annotations__.keys() if key in data}
         return Hifi(**valid_keys)
 
     def __str__(self) -> str:
@@ -296,11 +265,7 @@ class AudioOutputDeviceInfo:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "AudioOutputDeviceInfo":
-        valid_keys = {
-            key: data[key]
-            for key in AudioOutputDeviceInfo.__annotations__.keys()
-            if key in data
-        }
+        valid_keys = {key: data[key] for key in AudioOutputDeviceInfo.__annotations__.keys() if key in data}
         return AudioOutputDeviceInfo(**valid_keys)
 
     def __str__(self) -> str:
@@ -375,9 +340,7 @@ class MetadataMap:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "MetadataMap":
-        valid_keys = {
-            key: data[key] for key in MetadataMap.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data[key] for key in MetadataMap.__annotations__.keys() if key in data}
         return MetadataMap(**valid_keys)
 
     def __str__(self) -> str:
@@ -404,25 +367,17 @@ class Device:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "Device":
-        valid_keys = {
-            key: data.get(key) for key in Device.__annotations__.keys() if key in data
-        }
+        valid_keys = {key: data.get(key) for key in Device.__annotations__.keys() if key in data}
 
         if "capabilities" in valid_keys:
             valid_keys["capabilities"] = Capabilities.from_dict(
                 dict(valid_keys["capabilities"])  # type: ignore
             )
 
-        if "metadata_map" in valid_keys and isinstance(
-            valid_keys["metadata_map"], dict
-        ):
-            valid_keys["metadata_map"] = MetadataMap.from_dict(
-                valid_keys["metadata_map"]
-            )
+        if "metadata_map" in valid_keys and isinstance(valid_keys["metadata_map"], dict):
+            valid_keys["metadata_map"] = MetadataMap.from_dict(valid_keys["metadata_map"])
 
-        if "audio_output_device_info" in valid_keys and isinstance(
-            valid_keys["audio_output_device_info"], dict
-        ):
+        if "audio_output_device_info" in valid_keys and isinstance(valid_keys["audio_output_device_info"], dict):
             valid_keys["audio_output_device_info"] = AudioOutputDeviceInfo.from_dict(
                 valid_keys["audio_output_device_info"]
             )

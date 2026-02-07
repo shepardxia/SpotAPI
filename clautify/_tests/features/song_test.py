@@ -1,6 +1,7 @@
 import pytest
-from clautify import Song, SongError, PrivatePlaylist
 from session import _MainFixture
+
+from clautify import PrivatePlaylist, Song, SongError
 
 playlist_instance = PrivatePlaylist(_MainFixture.login, playlist="test_playlist_id")
 song_instance = Song(playlist=playlist_instance)
@@ -8,13 +9,9 @@ song_instance = Song(playlist=playlist_instance)
 
 def test_song_initialization():
     """Test the initialization of the Song class."""
-    song_with_playlist = Song(
-        playlist=playlist_instance, client=_MainFixture.login.client
-    )
+    song_with_playlist = Song(playlist=playlist_instance, client=_MainFixture.login.client)
     assert song_with_playlist.playlist is playlist_instance
-    assert isinstance(
-        song_with_playlist.base.client, _MainFixture.login.client.__class__
-    )
+    assert isinstance(song_with_playlist.base.client, _MainFixture.login.client.__class__)
 
 
 def test_query_songs():

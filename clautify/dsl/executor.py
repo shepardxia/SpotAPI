@@ -2,12 +2,12 @@
 
 from typing import Any, Dict, Optional
 
+from clautify.album import PublicAlbum
+from clautify.artist import Artist
 from clautify.login import Login
 from clautify.player import Player
-from clautify.song import Song
-from clautify.artist import Artist
-from clautify.album import PublicAlbum
 from clautify.playlist import PrivatePlaylist
+from clautify.song import Song
 
 
 class DSLError(Exception):
@@ -21,7 +21,7 @@ class DSLError(Exception):
 def _extract_id(uri_or_name: str, kind: str = "track") -> str:
     """Extract the bare ID from a Spotify URI, or return as-is."""
     prefix = f"spotify:{kind}:"
-    return uri_or_name[len(prefix):] if uri_or_name.startswith(prefix) else uri_or_name
+    return uri_or_name[len(prefix) :] if uri_or_name.startswith(prefix) else uri_or_name
 
 
 def _is_uri(target: str) -> bool:
@@ -38,16 +38,16 @@ def _uri_kind(uri: str) -> str:
 
 # action -> (executor_property, method_name, uri_kind)
 _SIMPLE_TARGET_ACTIONS = {
-    "like":     ("song", "like_song", "track"),
-    "unlike":   ("song", "unlike_song", "track"),
-    "follow":   ("artist", "follow", "artist"),
+    "like": ("song", "like_song", "track"),
+    "unlike": ("song", "unlike_song", "track"),
+    "follow": ("artist", "follow", "artist"),
     "unfollow": ("artist", "unfollow", "artist"),
 }
 
 # action -> playlist method name
 _PLAYLIST_ACTIONS = {
-    "save":            "add_to_library",
-    "unsave":          "remove_from_library",
+    "save": "add_to_library",
+    "unsave": "remove_from_library",
     "playlist_delete": "delete_playlist",
 }
 
@@ -162,7 +162,7 @@ class SpotifyExecutor:
         # Standalone state modifiers
         elif action == "set":
             result = {"status": "ok", "action": "set"}
-            for k in ("volume", "mode", "device"):
+            for k in ("volume", "volume_rel", "mode", "device"):
                 if k in cmd:
                     result[k] = cmd[k]
 
@@ -183,6 +183,15 @@ class SpotifyExecutor:
                 raise DSLError(f"Volume must be 0-100, got {vol}")
             # Normalize to 0-1.0 for Player API
             self.player.set_volume(vol if vol <= 1 else vol / 100)
+        if "volume_rel" in cmd:
+            delta = cmd["volume_rel"]  # percentage points, e.g. +10 or -5
+            devices = self.player.device_ids
+            dev = devices.devices.get(self.player.active_id)
+            if dev is None:
+                raise DSLError("Cannot determine current volume for relative adjustment")
+            current = dev.volume / 65535  # 0.0 to 1.0
+            new_vol = max(0.0, min(1.0, current + delta / 100))
+            self.player.set_volume(new_vol)
         if "mode" in cmd:
             mode = cmd["mode"]
             self.player.set_shuffle(mode == "shuffle")
@@ -207,8 +216,7 @@ class SpotifyExecutor:
         if context:
             if not _is_uri(context):
                 raise DSLError(
-                    'play with "in" context requires a playlist URI, '
-                    'e.g. play "song" in spotify:playlist:abc',
+                    'play with "in" context requires a playlist URI, e.g. play "song" in spotify:playlist:abc',
                     command=cmd,
                 )
             self.player.play_track(track_uri, context)
@@ -256,7 +264,12 @@ class SpotifyExecutor:
     def _action_playlist_create(self, cmd: Dict[str, Any]) -> Dict[str, Any]:
         name = cmd["name"]
         playlist_id = PrivatePlaylist(self._login).create_playlist(name)
-        return {"status": "ok", "action": "playlist_create", "name": name, "playlist_id": playlist_id}
+        return {
+            "status": "ok",
+            "action": "playlist_create",
+            "name": name,
+            "playlist_id": playlist_id,
+        }
 
     # --- query dispatch ---
 
@@ -301,8 +314,7 @@ class SpotifyExecutor:
         target = cmd["target"]
         if not _is_uri(target):
             raise DSLError(
-                "info requires a Spotify URI (e.g. spotify:track:abc). "
-                "Use search to find URIs first.",
+                "info requires a Spotify URI (e.g. spotify:track:abc). Use search to find URIs first.",
                 command=cmd,
             )
 
@@ -317,6 +329,7 @@ class SpotifyExecutor:
             data = PublicAlbum(bare_id).get_album_info()
         elif kind == "playlist":
             from clautify.playlist import PublicPlaylist
+
             data = PublicPlaylist(bare_id).get_playlist_info()
         else:
             raise DSLError(f"Cannot get info for URI type: {kind}", command=cmd)

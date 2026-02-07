@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 __description__ = "DSL-driven Spotify control via private API (fork of SpotAPI by Aran)"
 __install_require__ = [

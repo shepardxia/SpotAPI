@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing_extensions import TypeAlias, Self
-from typing import Final, final, Any
+from typing import Any, Final, final
 
+from typing_extensions import Self, TypeAlias
 
 __all__ = ["_UndefinedType", "_Undefined", "_UStr"]
 

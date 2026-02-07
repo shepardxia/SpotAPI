@@ -1,16 +1,18 @@
 from __future__ import annotations
 
-import threading
 import atexit
 import json
-import time
 import signal
+import threading
+import time
 from typing import Any, Dict
-from clautify.login import Login
+
+from websockets.sync.client import connect
+
 from clautify.client import BaseClient
 from clautify.exceptions import WebSocketError
+from clautify.login import Login
 from clautify.types.annotations import enforce
-from websockets.sync.client import connect
 from clautify.utils.strings import random_hex_string
 
 __all__ = ["WebsocketStreamer", "WebSocketError"]
@@ -67,7 +69,7 @@ class WebsocketStreamer:
         signal.signal(signal.SIGINT, self.handle_interrupt)
 
     def register_device(self) -> None:
-        url = f"https://gue1-spclient.spotify.com/track-playback/v1/devices"
+        url = "https://gue1-spclient.spotify.com/track-playback/v1/devices"
         payload = {
             "device": {
                 "brand": "spotify",
@@ -153,10 +155,7 @@ class WebsocketStreamer:
         """Gets the Spotify Connection ID in the init packet"""
         packet = self.get_packet()
 
-        if (
-            packet.get("headers") is None
-            or dict(packet["headers"]).get("Spotify-Connection-Id") is None
-        ):
+        if packet.get("headers") is None or dict(packet["headers"]).get("Spotify-Connection-Id") is None:
             raise ValueError("Invalid init packet")
 
         return packet["headers"]["Spotify-Connection-Id"]

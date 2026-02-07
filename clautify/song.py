@@ -1,11 +1,12 @@
 import json
+from collections.abc import Generator, Iterable, Mapping
 from typing import Any, List, Tuple
-from clautify.types.annotations import enforce
+
+from clautify.client import BaseClient
 from clautify.exceptions import SongError
 from clautify.http.request import TLSClient
-from clautify.client import BaseClient
-from collections.abc import Mapping, Iterable, Generator
 from clautify.playlist import PrivatePlaylist, PublicPlaylist
+from clautify.types.annotations import enforce
 
 __all__ = ["Song", "SongError"]
 
@@ -69,9 +70,7 @@ class Song:
 
         return resp.response
 
-    def query_songs(
-        self, query: str, /, limit: int = 10, *, offset: int = 0
-    ) -> Mapping[str, Any]:
+    def query_songs(self, query: str, /, limit: int = 10, *, offset: int = 0) -> Mapping[str, Any]:
         """
         Searches for songs in the Spotify catalog.
         NOTE: Returns the raw result unlike paginate_songs which only returns the songs.
@@ -129,9 +128,7 @@ class Song:
 
         offset = UPPER_LIMIT
         while offset < total_count:
-            yield self.query_songs(query, limit=UPPER_LIMIT, offset=offset)["data"][
-                "searchV2"
-            ]["tracksV2"]["items"]
+            yield self.query_songs(query, limit=UPPER_LIMIT, offset=offset)["data"]["searchV2"]["tracksV2"]["items"]
             offset += UPPER_LIMIT
 
     def add_songs_to_playlist(self, song_ids: List[str], /) -> None:
@@ -189,9 +186,7 @@ class Song:
         resp = self.base.client.post(url, json=payload, authenticate=True)
 
         if resp.fail:
-            raise SongError(
-                "Could not remove song from playlist", error=resp.error.string
-            )
+            raise SongError("Could not remove song from playlist", error=resp.error.string)
 
     @staticmethod
     def parse_playlist_items(
@@ -204,10 +199,7 @@ class Song:
         uids: List[str] = []
         for item in items:
             is_song_id = song_id and song_id in item["itemV2"]["data"]["uri"]
-            is_song_name = (
-                song_name
-                and song_name.lower() in str(item["itemV2"]["data"]["name"]).lower()
-            )
+            is_song_name = song_name and song_name.lower() in str(item["itemV2"]["data"]["name"]).lower()
 
             if is_song_id or is_song_name:
                 uids.append(item["uid"])

@@ -1,0 +1,16 @@
+target-version = "py310"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "F403",  # star imports (used throughout __init__.py re-exports)
+    "F401",  # unused imports (re-exports via star imports)
+]
+
+[lint.per-file-ignores]
+"clautify/_tests/*" = ["E722"]           # bare except in legacy test session
+"clautify/types/*" = ["E722"]            # bare except in annotation checker
+"clautify/client.py" = ["E501", "F601"]  # long UA strings, duplicate key
+"clautify/websocket.py" = ["E501"]       # long UA string
+"clautify/utils/logger.py" = ["E501"]    # long docstring

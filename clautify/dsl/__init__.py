@@ -22,8 +22,8 @@ from typing import Any, Dict, Union
 
 from lark.exceptions import UnexpectedInput
 
+from clautify.dsl.executor import DSLError, SpotifyExecutor
 from clautify.dsl.parser import parse
-from clautify.dsl.executor import SpotifyExecutor, DSLError
 from clautify.login import Login
 from clautify.types import Config
 from clautify.utils.logger import NoopLogger
@@ -86,10 +86,7 @@ class SpotifySession:
         """
         src = Path(path) if path else _DEFAULT_SESSION_PATH
         if not src.exists():
-            raise DSLError(
-                f"No session file found at {src}. "
-                "Run SpotifySession.setup('your_sp_dc_cookie') first."
-            )
+            raise DSLError(f"No session file found at {src}. Run SpotifySession.setup('your_sp_dc_cookie') first.")
         raw = json.loads(src.read_text())
         dump = {
             "identifier": raw.get("identifier", "default"),
@@ -124,9 +121,7 @@ class SpotifySession:
         try:
             parsed = parse(command)
         except UnexpectedInput as e:
-            raise DSLError(
-                f"Invalid command: '{command}'. Valid commands: {_VALID_COMMANDS}"
-            ) from e
+            raise DSLError(f"Invalid command: '{command}'. Valid commands: {_VALID_COMMANDS}") from e
         except Exception as e:
             raise DSLError(f"Parse error: {e}") from e
 

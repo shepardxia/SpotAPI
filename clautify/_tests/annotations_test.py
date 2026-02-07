@@ -1,8 +1,9 @@
 # type: ignore
-from clautify.types.annotations import enforce
+from typing import Dict, Generator, Iterable, List, Mapping, Sequence, Tuple
 
 import pytest
-from typing import List, Dict, Tuple, Sequence, Iterable, Mapping, Generator
+
+from clautify.types.annotations import enforce
 
 
 @enforce
@@ -46,9 +47,7 @@ class _TCLASS:
     def test_tuple_or_none(self, _: Tuple[int, str] | None) -> None:
         pass
 
-    def test_sequence_or_generator(
-        self, _: Sequence[int] | Generator[int, None, None]
-    ) -> None:
+    def test_sequence_or_generator(self, _: Sequence[int] | Generator[int, None, None]) -> None:
         pass
 
 

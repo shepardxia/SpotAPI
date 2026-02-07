@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Union
+
 from requests import Response as StdResponse
 from tls_client.response import Response as TLSResponse
 
 __all__ = ["Response", "Error", "StdResponse", "TLSResponse"]
+
 
 # Dataclass needs to be here to avoid circular imports
 @dataclass

@@ -1,9 +1,9 @@
 """Spotify DSL parser — Lark grammar + transformer → command dict."""
 
-from typing import Any, Dict
 from pathlib import Path
+from typing import Any, Dict
 
-from lark import Lark, Transformer, Token
+from lark import Lark, Token, Transformer
 
 _GRAMMAR = (Path(__file__).parent / "grammar.lark").read_text()
 
@@ -31,6 +31,9 @@ class SpotifyTransformer(Transformer):
         return float(t)
 
     def SIGNED_NUMBER(self, t: Token) -> int:
+        return int(t)
+
+    def VOL_DELTA(self, t: Token) -> int:
         return int(t)
 
     def MODE(self, t: Token) -> str:
@@ -126,6 +129,9 @@ class SpotifyTransformer(Transformer):
 
     def volume(self, items):
         return ("volume", items[0])
+
+    def volume_rel(self, items):
+        return ("volume_rel", items[0])
 
     def mode(self, items):
         return ("mode", items[0])

@@ -43,7 +43,8 @@ start: action state_modifier*
 
 // === State Modifiers (actions only, or standalone) ===
 
-?state_modifier: "volume" NUMBER            -> volume
+?state_modifier: "volume" VOL_DELTA         -> volume_rel
+               | "volume" NUMBER            -> volume
                | "mode" MODE              -> mode
                | "on" ESCAPED_STRING      -> device
                | "device" ESCAPED_STRING  -> device
@@ -61,6 +62,7 @@ type: TYPE_KW
 TYPE_KW: "tracks"i | "artists"i | "albums"i | "playlists"i
 MODE: "normal"i | "shuffle"i | "repeat"i
 URI: /spotify:[a-z]+:[a-zA-Z0-9]+/
+VOL_DELTA: /[+-]\d+/
 
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER

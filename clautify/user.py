@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Any
 from collections.abc import Mapping
-from clautify.types.annotations import enforce
+from typing import Any
+
 from clautify import utils
 from clautify.exceptions import UserError
-from clautify.login import Login, RECAPTCHA_SITE_KEY
+from clautify.login import RECAPTCHA_SITE_KEY, Login
+from clautify.types.annotations import enforce
 
 __all__ = ["User", "UserError"]
 

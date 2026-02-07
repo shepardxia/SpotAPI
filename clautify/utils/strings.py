@@ -1,12 +1,12 @@
-from typing import List, Tuple, Dict
-from bs4 import BeautifulSoup
-import string
-import random
-import base64
 import ast
+import base64
 import os
+import random
 import re
+import string
+from typing import Dict, List, Tuple
 
+from bs4 import BeautifulSoup
 
 __all__ = [
     "random_b64_string",

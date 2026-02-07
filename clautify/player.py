@@ -1,13 +1,14 @@
-import uuid
 import time
-from clautify.utils import random_hex_string
-from clautify.exceptions import PlayerError
-from clautify.playlist import PublicPlaylist
-from clautify.types.annotations import enforce
-from clautify.status import PlayerStatus
-from clautify.login import Login
-from clautify.song import Song
+import uuid
 from typing import List
+
+from clautify.exceptions import PlayerError
+from clautify.login import Login
+from clautify.playlist import PublicPlaylist
+from clautify.song import Song
+from clautify.status import PlayerStatus
+from clautify.types.annotations import enforce
+from clautify.utils import random_hex_string
 
 __all__ = ["Player", "PlayerStatus", "PlayerError"]
 
@@ -40,9 +41,7 @@ class Player(PlayerStatus):
 
         if _active_id is None:
             if not device_id:
-                raise ValueError(
-                    "Could not get active device ID. Please provide a device ID."
-                )
+                raise ValueError("Could not get active device ID. Please provide a device ID.")
             self.active_id = device_id
         else:
             self.active_id = device_id if device_id else _active_id
@@ -56,15 +55,16 @@ class Player(PlayerStatus):
             raise ValueError("Could not get origin device ID.")
 
         self.device_id = _origin_device_id
-        self.transfer_player(self.device_id, self.active_id)
+        try:
+            self.transfer_player(self.device_id, self.active_id)
+        except PlayerError:
+            self._transfered = False
 
     def transfer_player(self, from_device_id: str, to_device_id: str) -> None:
         """Transfers the player streamer from one device to another."""
         url = f"https://gue1-spclient.spotify.com/connect-state/v1/connect/transfer/from/{from_device_id}/to/{to_device_id}"
         payload = {
-            "transfer_options": {
-                "restore_paused": "pause" if self.state.is_paused else "resume"
-            },
+            "transfer_options": {"restore_paused": "pause" if self.state.is_paused else "resume"},
             "command_id": random_hex_string(32),  # This is random for some reason
         }
         resp = self.client.post(url, json=payload, authenticate=True)
@@ -74,10 +74,10 @@ class Player(PlayerStatus):
 
         self._transfered = True
 
-    def _run_command(
-        self, from_device_id: str, to_device_id: str, payload: dict
-    ) -> None:
-        url = f"https://gue1-spclient.spotify.com/connect-state/v1/player/command/from/{from_device_id}/to/{to_device_id}"
+    def _run_command(self, from_device_id: str, to_device_id: str, payload: dict) -> None:
+        url = (
+            f"https://gue1-spclient.spotify.com/connect-state/v1/player/command/from/{from_device_id}/to/{to_device_id}"
+        )
         resp = self.client.post(url, json=payload, authenticate=True)
 
         if resp.fail:
@@ -97,9 +97,7 @@ class Player(PlayerStatus):
         }
         self._run_command(from_device_id, to_device_id, payload)
 
-    def _seek_to(
-        self, from_device_id: str, to_device_id: str, position_ms: int
-    ) -> None:
+    def _seek_to(self, from_device_id: str, to_device_id: str, position_ms: int) -> None:
         payload = {
             "command": {
                 "value": position_ms,
@@ -123,23 +121,21 @@ class Player(PlayerStatus):
         }
         self._run_command(from_device_id, to_device_id, payload)
 
-    def _set_volume(
-        self, from_device_id: str, to_device_id: str, volume_percent: float
-    ) -> None:
+    def _set_volume(self, from_device_id: str, to_device_id: str, volume_percent: float) -> None:
         if volume_percent < 0.0 or volume_percent > 1.0:
             raise ValueError("Volume must be a percent and between 0 and 1.0")
 
         sixteen_bit_rep = int(volume_percent * 65535)
-        url = f"https://gue1-spclient.spotify.com/connect-state/v1/connect/volume/from/{from_device_id}/to/{to_device_id}"
+        url = (
+            f"https://gue1-spclient.spotify.com/connect-state/v1/connect/volume/from/{from_device_id}/to/{to_device_id}"
+        )
         payload = {"volume": sixteen_bit_rep}
         resp = self.client.put(url, json=payload, authenticate=True)
 
         if resp.fail:
             raise PlayerError("Could not set volume", error=resp.error.string)
 
-    def _repeat_track(
-        self, from_device_id: str, to_device_id: str, value: bool
-    ) -> None:
+    def _repeat_track(self, from_device_id: str, to_device_id: str, value: bool) -> None:
         payload = {
             "command": {
                 "repeating_context": value,
