@@ -41,20 +41,24 @@ class Player(PlayerStatus):
 
         if _active_id is None:
             if not device_id:
-                raise ValueError("Could not get active device ID. Please provide a device ID.")
+                # No active device — fall back to first available
+                if _devices.devices:
+                    device_id = next(iter(_devices.devices.keys()))
+                else:
+                    raise ValueError("No Spotify devices found. Open Spotify on a device first.")
             self.active_id = device_id
         else:
             self.active_id = device_id if device_id else _active_id
 
         self.r_state = self.state
-        if self.r_state.play_origin is None:
-            raise ValueError("Could not get origin device ID.")
 
-        _origin_device_id = self.r_state.play_origin.device_identifier
-        if _origin_device_id is None:
-            raise ValueError("Could not get origin device ID.")
+        # Determine origin device (where the stream currently lives).
+        # When Spotify is idle, play_origin may be None — fall back to active_id.
+        _origin_device_id = None
+        if self.r_state.play_origin is not None:
+            _origin_device_id = self.r_state.play_origin.device_identifier
 
-        self.device_id = _origin_device_id
+        self.device_id = _origin_device_id or self.active_id
         try:
             self.transfer_player(self.device_id, self.active_id)
         except PlayerError:
