@@ -30,7 +30,6 @@ class Player(PlayerStatus):
         "active_id",
         "device_id",
         "r_state",
-        "_transfered",
     )
 
     def __init__(self, login: Login, device_id: str | None = None) -> None:
@@ -62,7 +61,7 @@ class Player(PlayerStatus):
         try:
             self.transfer_player(self.device_id, self.active_id)
         except PlayerError:
-            self._transfered = False
+            pass  # Transfer fails when Spotify is idle; commands still route correctly
 
     def transfer_player(self, from_device_id: str, to_device_id: str) -> None:
         """Transfers the player streamer from one device to another."""
@@ -75,8 +74,6 @@ class Player(PlayerStatus):
 
         if resp.fail:
             raise PlayerError("Could not transfer player", error=resp.error.string)
-
-        self._transfered = True
 
     def _run_command(self, from_device_id: str, to_device_id: str, payload: dict) -> None:
         url = (
@@ -198,7 +195,7 @@ class Player(PlayerStatus):
                     "skip_to": {
                         "track_uid": track_uid,
                         "track_index": 1,
-                        "track_uri": f"spotify:track:{track_uid}",
+                        "track_uri": f"spotify:track:{track}",
                     },
                     "player_options_override": {},
                 },
@@ -285,7 +282,40 @@ class Player(PlayerStatus):
                 _playlist.close()
                 break
 
+        if not uids:
+            raise PlayerError(f"Track {track} not found in playlist {playlist}")
+
         self._play_song(self.device_id, self.active_id, track, playlist, uids[0])
+
+    def play_context(self, context_uri: str) -> None:
+        """Play an album or playlist context from the beginning.
+
+        Unlike play_track(), this does not require a specific track —
+        playback starts from the first track in the context.
+        """
+        payload = {
+            "command": {
+                "context": {
+                    "uri": context_uri,
+                    "url": f"context://{context_uri}",
+                    "metadata": {},
+                },
+                "play_origin": {
+                    "feature_identifier": "playlist",
+                    "feature_version": "web-player_2024-08-20_1724112418648_eba321c",
+                    "referrer_identifier": "home",
+                },
+                "options": {
+                    "license": "tft",
+                    "player_options_override": {},
+                },
+                "logging_params": {
+                    "command_id": random_hex_string(32),
+                },
+                "endpoint": "play",
+            },
+        }
+        self._run_command(self.device_id, self.active_id, payload)
 
     def repeat_track(self, value: bool, /) -> None:
         """

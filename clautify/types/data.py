@@ -360,7 +360,7 @@ class Device:
     brand: str
     model: str
     public_ip: str
-    license: str
+    license: str | None = None
     spirc_version: str | None = None
     metadata_map: MetadataMap | None = None
     audio_output_device_info: AudioOutputDeviceInfo | None = None

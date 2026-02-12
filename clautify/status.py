@@ -98,7 +98,7 @@ class PlayerStatus(WebsocketStreamer):
 
         return Devices.from_dict(
             self._devices,
-            str(active_device_id) if hasattr(active_device_id, "__str__") else None,  # type: ignore
+            str(active_device_id) if active_device_id is not None else None,
         )
 
     @property

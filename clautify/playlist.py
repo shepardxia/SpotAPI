@@ -4,7 +4,7 @@ import json
 import re
 import time
 from collections.abc import Generator, Mapping
-from typing import Any
+from typing import Any, List, Optional
 
 from clautify.client import BaseClient
 from clautify.exceptions import PlaylistError
@@ -230,19 +230,31 @@ class PrivatePlaylist:
         # They are the same requests
         return self.remove_from_library()
 
-    def get_library(self, limit: int = 50, /) -> Mapping[str, Any]:
-        """Gets all the playlists in your library"""
+    def get_library(
+        self, limit: int = 50, /, *, offset: int = 0, filters: Optional[List[str]] = None
+    ) -> Mapping[str, Any]:
+        """Gets playlists in your library.
+
+        Parameters
+        ----------
+        limit : int
+            Maximum number of items to return. Defaults to 50.
+        offset : int
+            Number of items to skip before returning results. Defaults to 0.
+        filters : list of str, optional
+            Filter tags to apply (e.g. ["Playlists"]). Defaults to no filters.
+        """
         url = "https://api-partner.spotify.com/pathfinder/v1/query"
         params = {
             "operationName": "libraryV3",
             "variables": json.dumps(
                 {
-                    "filters": [],
+                    "filters": filters if filters is not None else [],
                     "order": None,
                     "textFilter": "",
                     "features": ["LIKED_SONGS", "YOUR_EPISODES", "PRERELEASES"],
                     "limit": limit,
-                    "offset": 0,
+                    "offset": offset,
                     "flatten": False,
                     "expandedFolders": [],
                     "folderUri": None,

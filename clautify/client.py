@@ -84,6 +84,7 @@ class BaseClient:
         self.client = client
         self.language = language
         self.client.authenticate = lambda kwargs: self._auth_rule(kwargs)
+        self.client.on_auth_failure = self._reset_auth
 
         self.browser_version = self.client.client_identifier.split("_")[1]
         self.client.headers.update(
@@ -116,6 +117,11 @@ class BaseClient:
         )
 
         return kwargs
+
+    def _reset_auth(self) -> None:
+        """Called by TLSClient on 401 — reset tokens so _auth_rule refetches."""
+        self.access_token = _Undefined
+        self.client_token = _Undefined
 
     def set_language(self, language: str) -> None:
         """Set the language for API requests. Uses ISO 639-1 language codes (e.g., 'ko', 'en', 'ja')."""

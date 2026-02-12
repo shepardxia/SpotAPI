@@ -36,6 +36,7 @@ _VALID_COMMANDS = (
 
 _DEFAULT_CONFIG_DIR = Path.home() / ".config" / "clautify"
 _DEFAULT_SESSION_PATH = _DEFAULT_CONFIG_DIR / "session.json"
+_DEFAULT_CACHE_PATH = _DEFAULT_CONFIG_DIR / "name_cache.json"
 
 __all__ = ["SpotifySession", "parse", "DSLError"]
 
@@ -48,8 +49,8 @@ class SpotifySession:
     first playback command.
     """
 
-    def __init__(self, login: Login, eager: bool = True):
-        self._executor = SpotifyExecutor(login, eager=eager)
+    def __init__(self, login: Login, eager: bool = True, cache_path: Union[Path, None] = _DEFAULT_CACHE_PATH):
+        self._executor = SpotifyExecutor(login, eager=eager, cache_path=cache_path)
 
     @classmethod
     def setup(
@@ -105,7 +106,10 @@ class SpotifySession:
         or {"status": "error", "authenticated": False, "error": "..."} on failure.
         """
         try:
-            self._executor._login.client._get_auth_vars()
+            from clautify.client import BaseClient
+
+            bc = BaseClient(self._executor._login.client)
+            bc._get_auth_vars()
             return {"status": "ok", "authenticated": True}
         except Exception as e:
             return {"status": "error", "authenticated": False, "error": str(e)}
@@ -126,6 +130,15 @@ class SpotifySession:
             raise DSLError(f"Parse error: {e}") from e
 
         return self._executor.execute(parsed)
+
+    @property
+    def max_volume(self) -> float:
+        """Max volume as 0.0-1.0. Clamps both absolute and relative volume commands."""
+        return self._executor._max_volume
+
+    @max_volume.setter
+    def max_volume(self, val: float) -> None:
+        self._executor._max_volume = max(0.0, min(1.0, val))
 
     def close(self) -> None:
         """Clean up resources (WebSocket, threads)."""

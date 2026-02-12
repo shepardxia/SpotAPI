@@ -118,6 +118,7 @@ class TLSClient(Session):
 
         self.auto_retries = auto_retries + 1
         self.authenticate = auth_rule
+        self.on_auth_failure: Callable[[], None] | None = None
         self.fail_exception: Type[ParentException] | None = None
         atexit.register(self.close)
 
@@ -173,17 +174,31 @@ class TLSClient(Session):
 
         return resp
 
-    def get(self, url: str | bytes, *, authenticate: bool = False, **kwargs) -> Response:
-        """Routes a GET Request"""
+    def _do_request(
+        self, method: str, url: str | bytes, *, authenticate: bool, danger: bool = False, **kwargs
+    ) -> Response:
         if authenticate and self.authenticate is not None:
             kwargs = self.authenticate(kwargs)
-
-        response = self.build_request("GET", url, allow_redirects=True, **kwargs)
-
+        response = self.build_request(method, url, allow_redirects=True, **kwargs)
         if response is None:
             raise TLSClientExeption("Request kept failing after retries.")
+        return self.parse_response(response, method, danger)
 
-        return self.parse_response(response, "GET", True)
+    def _authenticated_request(
+        self, method: str, url: str | bytes, *, authenticate: bool, danger: bool = False, **kwargs
+    ) -> Response:
+        parsed = self._do_request(method, url, authenticate=authenticate, danger=danger, **kwargs)
+
+        # 401 → reset auth → retry once
+        if parsed.status_code == 401 and self.on_auth_failure:
+            self.on_auth_failure()
+            parsed = self._do_request(method, url, authenticate=authenticate, danger=danger, **kwargs)
+
+        return parsed
+
+    def get(self, url: str | bytes, *, authenticate: bool = False, **kwargs) -> Response:
+        """Routes a GET Request"""
+        return self._authenticated_request("GET", url, authenticate=authenticate, danger=True, **kwargs)
 
     def post(
         self,
@@ -194,15 +209,7 @@ class TLSClient(Session):
         **kwargs,
     ) -> Response:
         """Routes a POST Request"""
-        if authenticate and self.authenticate is not None:
-            kwargs = self.authenticate(kwargs)
-
-        response = self.build_request("POST", url, allow_redirects=True, **kwargs)
-
-        if response is None:
-            raise TLSClientExeption("Request kept failing after retries.")
-
-        return self.parse_response(response, "POST", danger)
+        return self._authenticated_request("POST", url, authenticate=authenticate, danger=danger, **kwargs)
 
     def put(
         self,
@@ -213,12 +220,4 @@ class TLSClient(Session):
         **kwargs,
     ) -> Response:
         """Routes a PUT Request"""
-        if authenticate and self.authenticate is not None:
-            kwargs = self.authenticate(kwargs)
-
-        response = self.build_request("PUT", url, allow_redirects=True, **kwargs)
-
-        if response is None:
-            raise TLSClientExeption("Request kept failing after retries.")
-
-        return self.parse_response(response, "PUT", danger)
+        return self._authenticated_request("PUT", url, authenticate=authenticate, danger=danger, **kwargs)

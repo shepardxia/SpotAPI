@@ -159,8 +159,10 @@ class Song:
 
     def add_song_to_playlist(self, song_id: str, /) -> None:
         """Adds a song to the playlist"""
-        if "track" in song_id:
-            song_id = song_id.split("track/")[1]
+        if "track:" in song_id:
+            song_id = song_id.split("track:")[-1]
+        elif "track/" in song_id:
+            song_id = song_id.split("track/")[-1]
 
         self.add_songs_to_playlist([song_id])
 
@@ -221,8 +223,11 @@ class Song:
         Removes a song from the playlist.
         If all_instances is True, only song_name can be used.
         """
-        if song_id and "track" in song_id:
-            song_id = song_id.split("track:")[1]
+        if song_id:
+            if "track:" in song_id:
+                song_id = song_id.split("track:")[-1]
+            elif "track/" in song_id:
+                song_id = song_id.split("track/")[-1]
 
         if not (song_id or song_name or uid):
             raise ValueError("Must provide either song_id or song_name or uid")
@@ -262,8 +267,11 @@ class Song:
         if not self.playlist or not hasattr(self.playlist, "playlist_id"):
             raise ValueError("Playlist not set")
 
-        if song_id and "track" in song_id:
-            song_id = song_id.split("track:")[1]
+        if song_id:
+            if "track:" in song_id:
+                song_id = song_id.split("track:")[-1]
+            elif "track/" in song_id:
+                song_id = song_id.split("track/")[-1]
 
         url = "https://api-partner.spotify.com/pathfinder/v1/query"
         payload = {
@@ -286,8 +294,11 @@ class Song:
         if not self.playlist or not hasattr(self.playlist, "playlist_id"):
             raise ValueError("Playlist not set")
 
-        if song_id and "track" in song_id:
-            song_id = song_id.split("track:")[1]
+        if song_id:
+            if "track:" in song_id:
+                song_id = song_id.split("track:")[-1]
+            elif "track/" in song_id:
+                song_id = song_id.split("track/")[-1]
 
         url = "https://api-partner.spotify.com/pathfinder/v1/query"
         payload = {

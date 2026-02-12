@@ -13,7 +13,8 @@ start: action state_modifier*
 
 // === Actions (mutate state) ===
 
-?action: "play" target ("in" target)?     -> play
+?action: "play" play_kind target ("in" target)?  -> play
+       | "play" target ("in" target)?              -> play
        | "pause"                           -> pause
        | "resume"                          -> resume
        | "skip" SIGNED_NUMBER?             -> skip
@@ -32,7 +33,7 @@ start: action state_modifier*
 
 // === Queries (read state) ===
 
-?query: "search" ESCAPED_STRING type?      -> search
+?query: "search" ESCAPED_STRING+ type?     -> search
       | "now" "playing"                    -> now_playing
       | "get" "queue"                      -> get_queue
       | "get" "devices"                    -> get_devices
@@ -60,6 +61,9 @@ start: action state_modifier*
 
 type: TYPE_KW
 TYPE_KW: "tracks"i | "artists"i | "albums"i | "playlists"i
+
+play_kind: PLAY_KIND_KW
+PLAY_KIND_KW: "track"i | "album"i | "playlist"i
 MODE: "normal"i | "shuffle"i | "repeat"i
 URI: /spotify:[a-z]+:[a-zA-Z0-9]+/
 VOL_DELTA: /[+-]\d+/

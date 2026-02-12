@@ -42,15 +42,27 @@ class SpotifyTransformer(Transformer):
     def TYPE_KW(self, t: Token) -> str:
         return str(t).lower()
 
+    def PLAY_KIND_KW(self, token):
+        return str(token).lower()
+
+    def play_kind(self, items: list) -> str:
+        return items[0]
+
     def type(self, items: list) -> str:
         return items[0]
 
     # --- actions ---
 
     def play(self, items):
-        target = items[0]
-        context = items[1] if len(items) > 1 else None
-        return self._cmd("play", target=target, context=context)
+        result = self._cmd("play")
+        for item in items:
+            if isinstance(item, str) and item in ("track", "album", "playlist"):
+                result["kind"] = item
+            elif "target" not in result:
+                result["target"] = item
+            else:
+                result["context"] = item
+        return result
 
     def pause(self, items):
         return self._cmd("pause")
@@ -100,7 +112,14 @@ class SpotifyTransformer(Transformer):
     # --- queries ---
 
     def search(self, items):
-        return self._query("search", term=items[0], type=items[1] if len(items) > 1 else None)
+        TYPE_KEYWORDS = {"tracks", "artists", "albums", "playlists"}
+        if items and items[-1] in TYPE_KEYWORDS:
+            type_ = items[-1]
+            terms = list(items[:-1])
+        else:
+            type_ = None
+            terms = list(items)
+        return self._query("search", terms=terms, type=type_)
 
     def now_playing(self, items):
         return self._query("now_playing")
